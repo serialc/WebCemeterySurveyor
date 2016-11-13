@@ -1,0 +1,359 @@
+$font-stack: Roboto,Helvetica Neue,Helvetica,Arial,sans-serif;
+$primary-color:        #2196F3;
+$primary-color-dark:   #1976D2;
+$primary-color-light:  #BBDEFB;
+$accent-color:         #FF5722;
+$primary-text-color:   #212121;
+$secondary-text-color: #757575;
+$primary-text-color-invert:   #FFFFFF;
+$divider-color:        #BDBDBD;
+$divider-color-light:  #DDD;
+$divider-color-lighter:  #EEE;
+$link: #0275d8;
+$link-hover: #014c8c;
+
+$warning-color:        #d9534f;
+
+/* ---------------- Mixins -------------------------------- */
+@mixin rounded($radius: 0.5em) {
+    -webkit-border-radius: $radius;
+    -moz-border-radius: $radius;
+    border-radius: $radius;
+}
+
+$google-box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+@mixin box-shadow($h-shadow: 2px, $v-shadow: 2px, $blur: 4px, $spread: 0px, $color: rgba(0, 0, 0, 0.6), $inset: false) {
+    @if $inset {
+        -webkit-box-shadow:inset $v-shadow $h-shadow $blur $spread $color;
+        -moz-box-shadow:inset $v-shadow $h-shadow $blur $spread $color;
+        box-shadow:inset $v-shadow $h-shadow $blur $spread $color;
+    } @else {
+        -webkit-box-shadow: $v-shadow $h-shadow $blur $spread $color;
+        -moz-box-shadow: $v-shadow $h-shadow $blur $spread $color;
+        box-shadow: $v-shadow $h-shadow $blur $spread $color;
+    }
+}
+
+/* ---------------- Reset -------------------------------- */
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, em, img, strong, sub, sup, ol, ul, li, form, legend, label, table, tbody, tfoot, thead, tr, th, td {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+/* ---------------- Main layout -------------------------------- */
+body {
+    font: 120% $font-stack;
+    color: $primary-text-color;
+    font-weight: 400;
+    padding-bottom: 120px;
+}
+
+#main-content {
+    padding: 15px 0;
+}
+
+header {
+    font-size: 150%;
+    color: $primary-text-color-invert;
+    background-color: $primary-color;
+    //@include box-shadow(0px, -1px, 4px, 2px);
+    //box-shadow: $google-box-shadow;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28);
+    a, a:hover {
+        text-decoration: none;
+        color: $primary-text-color-invert;
+    }
+    a:hover {
+        color: $primary-color-light;
+    }
+}
+
+.item {
+    background-color: $primary-color-light;
+    padding: 0 0;
+    margin-top: 20px;
+}
+
+.link_item {
+    text-align: center;
+    padding: 10px 10px;
+    width: 100%;
+    display: block;
+    height: 47px;
+    cursor: pointer;
+    color: $link;
+    box-shadow: $google-box-shadow;
+    &:hover {
+        color: $link-hover;
+        text-decoration: none;
+    }
+}
+
+.left-div {
+    border-left: solid 1px $primary-color;
+}
+
+/* ---------------- Buttons, FABs -------------------------------- */
+.fab {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    background-color: $accent-color;
+    color: $primary-text-color-invert;
+    font-size: 150%;
+    font-weight: 200;
+    padding: 5px 13px;
+    @include rounded(30px);
+    //@include box-shadow();
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28);
+    //box-shadow: $google-box-shadow;
+    cursor: pointer;
+}
+
+/* ---------------- Warnings, confirmation colours/messages -------------------------------- */
+.warning_msg {
+    font-weight: 400;
+    color: white;
+    background-color: $warning-color; 
+}
+
+/* ---------------- Forms -------------------------------- */
+label {
+    //margin-right: 8px;
+}
+
+input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+/* ---------------- Headings -------------------------------- */
+h1 {
+    font-size: 150%;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+h2 {
+    font-size: 125%;
+}
+
+.correction {
+    padding-left: 0px;
+}
+
+/* ---------------- Misc -------------------------------- */
+.col-xs-12 {
+    /* bootstrap over-ride, may cause col to collapse... */
+    min-height: 0px;
+}
+.x {
+    padding: 5px;
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 7px 4px 12px;
+    margin: -10px;
+    line-height: 3px;
+    cursor: pointer;
+    width: 24px;
+    height: 22px;
+    text-align: center;
+    z-index: 12;
+    color: #999;
+    background-color: #555;
+    @include box-shadow(0px, 0px, 2px, 0, rgba(0, 0, 0, 0.6), false);
+    &::after {
+        content: "x"
+    }
+    &:hover {
+        background-color: #777;
+        color: $primary-text-color-invert;
+    }
+}
+.upper {
+    text-transform: uppercase;
+}
+.caps {
+    text-transform: capitalize;
+}
+.hide {
+    display: none;
+}
+
+.fa-spacer-m {
+    width: 29px;
+}
+.fa-spacer-ms {
+    width: 26px;
+}
+.fa-spacer-s {
+    width: 25px;
+}
+[type="checkbox"] {
+    width: 17px;
+    height: 19px;
+}
+
+.pointer {
+    cursor: pointer;
+    &:hover {
+        color: $link-hover;
+    }
+}
+
+.scope_survey, .scope_pics {
+    display: none;
+}
+
+/* ---------------- Survey editing -------------------------------- */
+.sscope {
+    margin-top: 15px;
+    & > div:first-child {
+        background-color: $primary-color-dark;
+        color: $primary-text-color-invert;
+    }
+}
+
+.stab {
+    & > div:first-child {
+        background-color: $primary-color;
+        color: inherit;
+    }
+}
+
+.sgroup {
+    & > div:first-child {
+        background-color: $primary-color-light;
+        /*border-bottom: 3px solid $primary-color-dark;*/
+    }
+}
+
+.squest {
+    &:nth-child(2n+1) > div:first-child {
+        background-color: $divider-color-light;
+    }
+    &:nth-child(2n) > div:first-child {
+        background-color: $divider-color-lighter;
+    }
+}
+
+.sgroup, .stab, .sscope {
+    /*margin-bottom: 30px;*/
+}
+
+.squest, .sgroup, .stab, .sscope {
+    & > div:first-child {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        cursor: pointer;
+    }
+    i {
+        text-align: center;
+        cursor: pointer;
+        padding: 5px;
+        &:hover {
+            color: $accent-color;
+        }
+    }
+}
+
+.squest {
+    &:last-child {
+        @include box-shadow(-6px, 0px, 5px, -5px, rgba(0, 0, 0, 0.6), true);
+    }
+}
+
+.stab:first-child > div, .sgroup:first-child > div, .squest:first-child > div:first-child {
+    @include box-shadow(6px, 0px, 5px, -5px, rgba(0, 0, 0, 0.6), true);
+}
+
+.sqform {
+    background-color: white;
+    margin: 15px -15px;
+}
+/* ---------------- Survey -------------------------------- */
+.ttitle {
+    margin-top: -15px;
+    margin-bottom: 15px;
+    background-color: $primary-color;
+    text-align: center;
+    color: $primary-text-color-invert;
+    padding: 15px;
+    cursor: pointer;
+    box-shadow: $google-box-shadow;
+    &:hover {
+        //background-color: $primary-color-light;
+        //color: $primary-text-color;
+        opacity: 0.9;
+    }
+}
+.gtitle {
+    background-color: $primary-color;
+    padding: 10px;
+    margin-top: 25px;
+    color: $primary-text-color-invert;
+    box-shadow: $google-box-shadow;
+}
+.ctitle {
+    padding: 10px;
+    //background-color: $primary-color-light;
+    //margin-top: 15px;
+}
+.ccontents {
+    //padding-top: 15px;
+    padding-bottom: 15px;
+}
+.citem {
+    background-color: white;
+    text-align: center;
+    padding: 10px;
+    //border: solid 1px $divider-color-light;
+    box-shadow: $google-box-shadow;
+    margin-bottom: 10px;
+    &:hover {
+        cursor: pointer;
+        background-color: $primary-color;
+    }
+}
+.selected {
+    background-color: $primary-color-dark;
+    color: $primary-text-color-invert;
+    z-index: 10;
+}
+.red-star::after {
+    content: " *";
+    color: red;
+}
+.thumbnail {
+    max-width: 100%;
+    height: 200px;
+}
+#pictures_footer {
+    display: none;
+    position: fixed;
+    bottom:0px;
+    width: 100%;
+    padding: 10px;
+    height: 130px;
+    background-color: #444;
+    z-index: 11;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 -4px 8px rgba(0, 0, 0, 0.28);
+    color: white;
+}
+#picture_carousel {
+    white-space: nowrap;
+    overflow-x: auto;
+    img {
+        margin-right: 10px;
+        display: inline;
+    }
+}
+.active_dz {
+    border: 2px dashed red;
+}

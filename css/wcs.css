@@ -1,0 +1,271 @@
+/* ---------------- Mixins -------------------------------- */
+/* ---------------- Reset -------------------------------- */
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, em, img, strong, sub, sup, ol, ul, li, form, legend, label, table, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* ---------------- Main layout -------------------------------- */
+body {
+  font: 120% Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: #212121;
+  font-weight: 400;
+  padding-bottom: 120px; }
+
+#main-content {
+  padding: 15px 0; }
+
+header {
+  font-size: 150%;
+  color: #FFFFFF;
+  background-color: #2196F3;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28); }
+  header a, header a:hover {
+    text-decoration: none;
+    color: #FFFFFF; }
+  header a:hover {
+    color: #BBDEFB; }
+
+.item {
+  background-color: #BBDEFB;
+  padding: 0 0;
+  margin-top: 20px; }
+
+.link_item {
+  text-align: center;
+  padding: 10px 10px;
+  width: 100%;
+  display: block;
+  height: 47px;
+  cursor: pointer;
+  color: #0275d8;
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24); }
+  .link_item:hover {
+    color: #014c8c;
+    text-decoration: none; }
+
+.left-div {
+  border-left: solid 1px #2196F3; }
+
+/* ---------------- Buttons, FABs -------------------------------- */
+.fab {
+  position: absolute;
+  bottom: 25px;
+  right: 25px;
+  background-color: #FF5722;
+  color: #FFFFFF;
+  font-size: 150%;
+  font-weight: 200;
+  padding: 5px 13px;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  border-radius: 30px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28);
+  cursor: pointer; }
+
+/* ---------------- Warnings, confirmation colours/messages -------------------------------- */
+.warning_msg {
+  font-weight: 400;
+  color: white;
+  background-color: #d9534f; }
+
+/* ---------------- Forms -------------------------------- */
+input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px; }
+
+/* ---------------- Headings -------------------------------- */
+h1 {
+  font-size: 150%;
+  margin-top: 1em;
+  margin-bottom: 0.5em; }
+
+h2 {
+  font-size: 125%; }
+
+.correction {
+  padding-left: 0px; }
+
+/* ---------------- Misc -------------------------------- */
+.col-xs-12 {
+  /* bootstrap over-ride, may cause col to collapse... */
+  min-height: 0px; }
+
+.x {
+  padding: 5px;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 7px 4px 12px;
+  margin: -10px;
+  line-height: 3px;
+  cursor: pointer;
+  width: 24px;
+  height: 22px;
+  text-align: center;
+  z-index: 12;
+  color: #999;
+  background-color: #555;
+  -webkit-box-shadow: 0px 0px 2px 0 rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: 0px 0px 2px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: 0px 0px 2px 0 rgba(0, 0, 0, 0.6); }
+  .x::after {
+    content: "x"; }
+  .x:hover {
+    background-color: #777;
+    color: #FFFFFF; }
+
+.upper {
+  text-transform: uppercase; }
+
+.caps {
+  text-transform: capitalize; }
+
+.hide {
+  display: none; }
+
+.fa-spacer-m {
+  width: 29px; }
+
+.fa-spacer-ms {
+  width: 26px; }
+
+.fa-spacer-s {
+  width: 25px; }
+
+[type="checkbox"] {
+  width: 17px;
+  height: 19px; }
+
+.pointer {
+  cursor: pointer; }
+  .pointer:hover {
+    color: #014c8c; }
+
+.scope_survey, .scope_pics {
+  display: none; }
+
+/* ---------------- Survey editing -------------------------------- */
+.sscope {
+  margin-top: 15px; }
+  .sscope > div:first-child {
+    background-color: #1976D2;
+    color: #FFFFFF; }
+
+.stab > div:first-child {
+  background-color: #2196F3;
+  color: inherit; }
+
+.sgroup > div:first-child {
+  background-color: #BBDEFB;
+  /*border-bottom: 3px solid $primary-color-dark;*/ }
+
+.squest:nth-child(2n+1) > div:first-child {
+  background-color: #DDD; }
+.squest:nth-child(2n) > div:first-child {
+  background-color: #EEE; }
+
+.sgroup, .stab, .sscope {
+  /*margin-bottom: 30px;*/ }
+
+.squest > div:first-child, .sgroup > div:first-child, .stab > div:first-child, .sscope > div:first-child {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  cursor: pointer; }
+.squest i, .sgroup i, .stab i, .sscope i {
+  text-align: center;
+  cursor: pointer;
+  padding: 5px; }
+  .squest i:hover, .sgroup i:hover, .stab i:hover, .sscope i:hover {
+    color: #FF5722; }
+
+.squest:last-child {
+  -webkit-box-shadow: inset 0px -6px 5px -5px rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: inset 0px -6px 5px -5px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0px -6px 5px -5px rgba(0, 0, 0, 0.6); }
+
+.stab:first-child > div, .sgroup:first-child > div, .squest:first-child > div:first-child {
+  -webkit-box-shadow: inset 0px 6px 5px -5px rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: inset 0px 6px 5px -5px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0px 6px 5px -5px rgba(0, 0, 0, 0.6); }
+
+.sqform {
+  background-color: white;
+  margin: 15px -15px; }
+
+/* ---------------- Survey -------------------------------- */
+.ttitle {
+  margin-top: -15px;
+  margin-bottom: 15px;
+  background-color: #2196F3;
+  text-align: center;
+  color: #FFFFFF;
+  padding: 15px;
+  cursor: pointer;
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24); }
+  .ttitle:hover {
+    opacity: 0.9; }
+
+.gtitle {
+  background-color: #2196F3;
+  padding: 10px;
+  margin-top: 25px;
+  color: #FFFFFF;
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24); }
+
+.ctitle {
+  padding: 10px; }
+
+.ccontents {
+  padding-bottom: 15px; }
+
+.citem {
+  background-color: white;
+  text-align: center;
+  padding: 10px;
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+  margin-bottom: 10px; }
+  .citem:hover {
+    cursor: pointer;
+    background-color: #2196F3; }
+
+.selected {
+  background-color: #1976D2;
+  color: #FFFFFF;
+  z-index: 10; }
+
+.red-star::after {
+  content: " *";
+  color: red; }
+
+.thumbnail {
+  max-width: 100%;
+  height: 200px; }
+
+#pictures_footer {
+  display: none;
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+  padding: 10px;
+  height: 130px;
+  background-color: #444;
+  z-index: 11;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 -4px 8px rgba(0, 0, 0, 0.28);
+  color: white; }
+
+#picture_carousel {
+  white-space: nowrap;
+  overflow-x: auto; }
+  #picture_carousel img {
+    margin-right: 10px;
+    display: inline; }
+
+.active_dz {
+  border: 2px dashed red; }
+
+/*# sourceMappingURL=wcs.css.map */

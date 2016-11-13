@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+#RewriteBase /~cyrille/WebCemeterySurveyor/
+#RewriteRule ^(css|imgs|data)($|/) - [L]
+#RewriteRule ^[css|imgs|data][/.*|$] - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule (.*)$ index.php?request=$1 [QSA,L] 
+# Case sensitive version
+#RewriteRule (.*)$ index.php?request=$1 [QSA,NC,L] 
+</IfModule>
