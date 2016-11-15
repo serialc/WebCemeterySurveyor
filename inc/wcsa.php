@@ -14,7 +14,8 @@ class wcsalib {
     public function __construct() {
         # set working dir to the that where index.php is
         # This is important as ajax calls are originally using inc/ as working dir.
-        if( array_pop(explode('/', getcwd())) === 'inc' ) {
+        $cwd = explode('/', getcwd());
+        if( array_pop($cwd) === 'inc' ) {
             // go to parent
             chdir('..');
         }
@@ -31,9 +32,20 @@ class wcsalib {
             mkdir($this->photo_dir);
         } 
 
+        # Get URL base path
         $url = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
         $this->basepath = explode('WCS', $url)[0] . 'WCS/';
-        $this->project = explode('/', explode('WCS', $url)[1])[2];
+
+        # Extract the project name from the url (If there is one!)
+        $project_search = explode('WCS', trim($url, '/'));
+        if( count($project_search) < 2 ) {
+            $this->project = '';
+        } else {
+            $project_search = explode('/', trim($project_search[1], '/'));
+            if( count($project_search) === 2 && $project_search[0] === 'surveys' ) {
+                $this->project = $project_search[1];
+            }
+        }
     }
 
     function __destruct() {
@@ -638,7 +650,7 @@ class wcsalib {
     }
 
     # Generate the picture displays of photographs ASSOCIATED with this scope item
-    private function _build_scope_pictures($scope, $cemetery, $section, $grave) {
+    private function _build_scope_pictures($scope, $project, $cemetery, $section, $grave) {
         print '<div class="row scope_pics"><div class="col-xs-12"><h2>Pictures</h2></div></div>';
         print '<div id="scope_pics_contents" class="row scope_pics">';
         # Pictures are retrieved asynchronously
@@ -646,15 +658,15 @@ class wcsalib {
         # Make sure that a photographs folder exists for this scope and create it if it doesn't yet exist
         switch( $scope ) {
         case 'cemetery':
-            $pdir = $this->data . $this->project . '/' . $cemetery . '/photographs';
+            $pdir = $this->data . $project . '/' . $cemetery . '/photographs';
             break;
 
         case 'section':
-            $pdir = $this->data . $this->project . '/' . $cemetery . '/' . $section . '/photographs';
+            $pdir = $this->data . $project . '/' . $cemetery . '/' . $section . '/photographs';
             break;
 
         case 'grave':
-            $pdir = $this->data . $this->project . '/' . $cemetery . '/' . $section . '/' . $grave . '/photographs';
+            $pdir = $this->data . $project . '/' . $cemetery . '/' . $section . '/' . $grave . '/photographs';
             break;
 
         default:
@@ -767,7 +779,7 @@ class wcsalib {
         print $this->_build_scope_survey('grave', array( "project" => $project, "cemetery" => $cemetery, "section" => $section, "grave" => $grave) );
 
         # build hidden pictures 
-        print $this->_build_scope_pictures('cemetery', $cemetery, $section, $grave);
+        print $this->_build_scope_pictures('cemetery', $project, $cemetery, $section, $grave);
     }
 
     # Show the contents of a section
@@ -798,7 +810,7 @@ class wcsalib {
         print $this->_build_scope_survey('section', array( "project" => $project, "cemetery" => $cemetery, "section" => $section) );
 
         # build hidden pictures 
-        print $this->_build_scope_pictures('cemetery', $cemetery, $section, '');
+        print $this->_build_scope_pictures('cemetery', $project, $cemetery, $section, '');
     }
 
     private function _show_cemetery_contents($project, $cemetery) {
@@ -828,7 +840,7 @@ class wcsalib {
         print $this->_build_scope_survey('cemetery', array( "project" => $project, "cemetery" => $cemetery) );
 
         # build hidden pictures 
-        print $this->_build_scope_pictures('cemetery', $cemetery, '', '');
+        print $this->_build_scope_pictures('cemetery', $project, $cemetery, '', '');
     }
 
     private function _show_cemeteries($project) {
