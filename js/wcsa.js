@@ -864,6 +864,11 @@ WCSA.new_survey_item = function(event, uid) {
         case 1:
             scope = uidparts[0];
             
+            // check that the target object is not empty
+            if( WCSA.survey[scope] === undefined ) {
+                WCSA.survey[scope] = [];
+            }
+
             // add new json tab object
             WCSA.survey[scope].push({
                 "_type": "tab",

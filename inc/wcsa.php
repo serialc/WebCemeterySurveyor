@@ -1,6 +1,8 @@
 <?php
 date_default_timezone_set("UTC");
 
+PHP_OS == "Windows" || PHP_OS == "WINNT" ? define("SEPARATOR", "\\") : define("SEPARATOR", "/");
+
 class wcsalib {
 
     # define private variables here
@@ -14,7 +16,7 @@ class wcsalib {
     public function __construct() {
         # set working dir to the that where index.php is
         # This is important as ajax calls are originally using inc/ as working dir.
-        $cwd = explode('/', getcwd());
+        $cwd = explode(SEPARATOR, getcwd());
         if( array_pop($cwd) === 'inc' ) {
             // go to parent
             chdir('..');
@@ -467,8 +469,8 @@ class wcsalib {
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'set\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $seti . '\')' .
@@ -495,8 +497,8 @@ class wcsalib {
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'set_thumbnail\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $tn . '\')' .
@@ -522,8 +524,8 @@ class wcsalib {
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'radio\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $seti . '\')' .
@@ -553,8 +555,8 @@ class wcsalib {
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'radio_thumbnail\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $tn . '\')' .
@@ -583,8 +585,8 @@ class wcsalib {
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'binary\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $seti . '\')' .
@@ -605,8 +607,8 @@ class wcsalib {
                             'onblur="WCSA.submit_input(this, \'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'measurement\',\'' . 
                                                             $cat['name'] . '\',' . 
                                                             'this.value)" ' .
@@ -629,8 +631,8 @@ class wcsalib {
                             'onblur="WCSA.submit_input(this, \'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
-                                                            $identobj['section']  . '\',\'' .
-                                                            $identobj['grave']  . '\',\'' .
+                                                            (isset($identobj['section']) ? $identobj['section'] : '')  . '\',\'' .
+                                                            (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'text\',\'' . 
                                                             $cat['name'] . '\',' . 
                                                             'this.value)" ' .
