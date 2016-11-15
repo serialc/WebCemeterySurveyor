@@ -125,7 +125,7 @@ if ( $reqlen == 0 ) {
 <?php
 
 # Get the path parts
-$req = $_GET[request];
+$req = $_GET['request'];
 $arr = get_defined_vars();
 #print(nl2br(print_r($req, true)));
 
