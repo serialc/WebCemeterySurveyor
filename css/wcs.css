@@ -13,7 +13,8 @@ body {
   font: 120% Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
   color: #212121;
   font-weight: 400;
-  padding-bottom: 120px; }
+  padding-bottom: 120px;
+  margin-top: 71px; }
 
 #main-content {
   padding: 15px 0; }
@@ -22,12 +23,19 @@ header {
   font-size: 150%;
   color: #FFFFFF;
   background-color: #2196F3;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28); }
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(0, 0, 0, 0.28);
+  max-height: 71px; }
   header a, header a:hover {
     text-decoration: none;
     color: #FFFFFF; }
   header a:hover {
     color: #BBDEFB; }
+
+.nav-main-title {
+  font-size: 0.7em; }
+
+.nav-sub-title {
+  font-size: 0.6em; }
 
 .item {
   background-color: #BBDEFB;
@@ -95,6 +103,13 @@ h2 {
   /* bootstrap over-ride, may cause col to collapse... */
   min-height: 0px; }
 
+.photo_info {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 4px;
+  top: 0; }
+
 .x {
   padding: 5px;
   position: absolute;
@@ -107,7 +122,7 @@ h2 {
   width: 24px;
   height: 22px;
   text-align: center;
-  z-index: 12;
+  z-index: 22;
   color: #999;
   background-color: #555;
   -webkit-box-shadow: 0px 0px 2px 0 rgba(0, 0, 0, 0.6);
@@ -146,7 +161,7 @@ h2 {
   .pointer:hover {
     color: #014c8c; }
 
-.scope_survey, .scope_pics {
+.scope_survey, .scope_pics, .bookmarks_list {
   display: none; }
 
 /* ---------------- Survey editing -------------------------------- */
@@ -215,7 +230,8 @@ h2 {
   padding: 10px;
   margin-top: 25px;
   color: #FFFFFF;
-  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24); }
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+  z-index: 15; }
 
 .ctitle {
   padding: 10px; }
@@ -254,7 +270,7 @@ h2 {
   padding: 10px;
   height: 130px;
   background-color: #444;
-  z-index: 11;
+  z-index: 21;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.14), 0 -4px 8px rgba(0, 0, 0, 0.28);
   color: white; }
 
@@ -264,6 +280,9 @@ h2 {
   #picture_carousel img {
     margin-right: 10px;
     display: inline; }
+
+.dropzone {
+  border: 2px solid white; }
 
 .active_dz {
   border: 2px dashed red; }

@@ -4,15 +4,22 @@ if( typeof WCSA === 'undefined' ) {
     WCSA = {};
 }
 
+// Use the hash for navigation
+window.onload = function() {
+    switch(window.location.hash) {
+        case '#bookmark':
+            WCSA.show_bookmarks();
+        break;
+    }
+}
+
 WCSA.base_path = document.URL.split('WCS')[0] + 'WCS/';
 
-var dragged;
-
 WCSA.new_scope_item = function(scope, project, cemetery, section) {
-var html;
+    var html;
 
-htmls = '<form onsubmit="return false">' + 
-'<input type="hidden" id="type" name="type" value="new_scope_item">' +
+    htmls = '<form onsubmit="return false">' + 
+    '<input type="hidden" id="type" name="type" value="new_scope_item">' +
         '<input type="hidden" id="scope" name="scope" value="' + scope + '">' +
         '<input type="hidden" id="project" name="project" value="' + project + '">';
 
@@ -1072,7 +1079,6 @@ WCSA.update_full_json_survey = function() {
     .done(function(e) {
     })
     .fail(function(e) {
-        console.log(e);
         WCSA.error("Unable to update data on server.");
     });
 };
@@ -1187,15 +1193,22 @@ WCSA.delete_survey_item = function(event, uid) {
 WCSA.show_scope_survey = function(scope) {
     $('.scope_list').hide()
     $('.scope_pics').hide();
+    document.getElementById('pictures_footer').style.display = '';
     $('.scope_survey').show();
 }
 
 WCSA.show_scope_contents = function(scope) {
     $('.scope_survey').hide();
     $('.scope_pics').hide();
-    document.getElementById('pictures_footer').style.display = 'none';
+    $('.bookmarks_list').hide();
+    document.getElementById('pictures_footer').style.display = '';
     $('.scope_list').show()
 }
+
+WCSA.show_bookmarks = function() {
+    $('.scope_list').hide();
+    $('.bookmarks_list').show();
+};
 
 WCSA.submit_input = function(elem, scope, project, cemetery, section, grave, data_type, name, value) {
 
@@ -1313,6 +1326,7 @@ WCSA.toggle_camera = function() {
     var target,
         elems,
         htmls = '',
+        counter,
         i;
         
     target = document.getElementById('pictures_footer');
@@ -1327,79 +1341,140 @@ WCSA.toggle_camera = function() {
             url: WCSA.base_path + "inc/get_picture_list.php"
         })
         .done(function(data) {
+            counter = 0;
+
+            // Show the available images in the carrousel
             target = document.getElementById('picture_carousel');
             for(i = 0; i < data.length; i += 1) {
                 htmls += '<img id="' + data[i] + '" src="' + WCSA.base_path + 'photographs/' + data[i] + '" width="100" height="100" draggable="true">';
             }
             target.innerHTML = htmls;
 
-            // Go through all the img and add drag star to them
+            function prep_drop_targets() {
+                // Prepare all the drag and drop functionality for the targets
+                var idp,
+                    i,
+                    target,
+                    lasttarget,
+                    data,
+                    thumbnail,
+                    targets = document.getElementsByClassName('dropzone');
+
+                // Make all potential targets highlighted
+                for(i = 0; i < targets.length; i += 1) {
+                    targets[i].classList.add('active_dz')
+
+                    // DROP
+                    targets[i].addEventListener('drop', function( event ) {
+                        // prevent URL follow
+                        event.preventDefault();
+
+                        // retrieve data passed on dragstart and process it
+
+                        // Bubble up to get the id of the dragzone element
+                        target = event.target;
+                        for( i = 0; i < 3; i += 1 ) {
+                            if( !target.classList || !target.classList.contains('dropzone') ) {
+                                // overwrite with parent
+                                target = target.parentNode;
+                            }
+                        }
+
+                        // remove highlights
+                        this.style.borderColor = '';
+                        this.style.borderStyle = '';
+
+                        // ask the server to move the image to this scope's picture folder
+                        // Also add data to this scopes data file with the file name and associated NAME and, possible ATTRIBUTE
+                        idp = target.id.split(':::');
+                        if( idp.length === 2 ) {
+                            data = {"picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0], "attribute": idp[1]};
+                        } else {
+                            data = {"picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0]};
+                        }
+
+                        $.ajax({
+                            type: "POST",
+                            url: WCSA.base_path + "inc/associate_photo.php",
+                            dataType: "json", 
+                            data: data
+                        })
+                        .done(function(e) {
+                            // On successful move
+                            // Remove picture from picture_carousel
+                            thumbnail = document.getElementById(event.dataTransfer.getData('text'));
+                            thumbnail.parentNode.removeChild(thumbnail);
+                        })
+                        .fail(function(e) {
+                            WCSA.error("Unable to move photograph to associate it with this feature: " + e);     
+                        })
+                    }, false);
+
+                    // DRAGOVER
+                    // important, otherwise 'drop' does not get called
+                    targets[i].addEventListener('dragover', function( event ) {
+                        event.preventDefault();
+                    }, false);
+
+                    // DRAGENTER
+                    targets[i].addEventListener('dragenter', function( event ) {
+                        counter += 1;
+                        this.style.borderColor = 'green';
+                        this.style.borderStyle = 'solid';
+
+                        // Bubble up to get the id of the dragzone element
+                        target = event.target;
+                        for( i = 0; i < 3; i += 1 ) {
+                            if( !target.classList || !target.classList.contains('dropzone') ) {
+                                // overwrite with parent
+                                target = target.parentNode;
+                            }
+                        }
+
+                        // See if this is the dropzone as the last, reset the last one if not
+                        if( lasttarget !== target && lasttarget !== undefined ) {
+                            lasttarget.style.borderColor = '';
+                            lasttarget.style.borderStyle = '';
+                        }
+                        lasttarget = target;
+                    }, false);
+                    
+                    // DRAGLEAVE
+                    targets[i].addEventListener('dragleave', function( event ) {
+                        counter -= 1;
+                        if( counter === 0 ) {
+                            this.style.borderColor = '';
+                            this.style.borderStyle = '';
+                        }
+                    }, false);
+                }
+
+                // Listen for global 'drop' to undo highlights
+                document.addEventListener('drop', function(event) {
+                    // prevent URL follow
+                    event.preventDefault();
+                    // hide highlights for all possible targets
+                    for(i = 0; i < targets.length; i += 1) {
+                        targets[i].classList.remove('active_dz');
+                    }
+                    // need to reset counter as we possible dropped inside a cell (counter !== 0)
+                    counter = 0;
+                }, false);
+
+                // necessary for global drop to be caught above
+                document.addEventListener('dragover', function(event) {
+                    event.preventDefault();
+                }, false);
+            }
+
+            // Go through all the draggable imgs and add dragstart to them
             elems = target.children;
             for(i = 0; i < elems.length; i += 1) {
                 elems[i].addEventListener('dragstart', function(event) {
-                    event.dataTransfer.setData('application/json', data);
-                }, false);
-
-            }
-
-            // Prepare all the drag and drop functionality
-            // STILL NEED TO CUSTOMIZE THE TARGETS - replace document with... whatever it needs to be.
-            elems = document.getElementsByClassName('dropzone');
-            for(i = 0; i < elems.length; i += 1) {
-                elems[i].classList.add('active_dz')
-                elems[i].addEventListener('drop', function( event ) {
-                    console.log(event);
+                    event.dataTransfer.setData('text', this.id);
+                    prep_drop_targets();
                 }, false);
             }
-
-            /* events fired on the draggable target */
-            //document.addEventListener("drag", function( event ) {
-            //}, false);
-
-            //document.addEventListener("dragstart", function( event ) {
-                // store a ref. on the dragged elem
-            //    dragged = event.target;
-                // make it half transparent
-            //    event.target.style.opacity = .5;
-            //}, false);
-
-            // What to do on drag end, such as being dropped outside of zone
-            //document.addEventListener("dragend", function( event ) {
-                //console.log('drag_end');
-                //console.log(event);
-            //}, false);
-
-            /* events fired on the drop targets */
-            //document.addEventListener("dragover", function( event ) {
-                // prevent default to allow drop
-            //    event.preventDefault();
-            //    console.log(event.target);
-            //}, false);
-
-            document.addEventListener("dragenter", function( event ) {
-                // highlight potential drop target when the draggable element enters it
-                if ( event.target.className == "dropzone" ) {
-                    event.target.style.background = "purple";
-                }
-            }, false);
-
-            document.addEventListener("dragleave", function( event ) {
-                // reset background of potential drop target when the draggable element leaves it
-                if ( event.target.className == "dropzone" ) {
-                    event.target.style.background = "";
-                }
-            }, false);
-
-            document.addEventListener("drop", function( event ) {
-                // prevent default action (open as link for some elements)
-                event.preventDefault();
-                // move dragged elem to the selected drop target
-                if ( event.target.className == "dropzone" ) {
-                    event.target.style.background = "";
-                    dragged.parentNode.removeChild( dragged );
-                    event.target.appendChild( dragged );
-                }
-            }, false);
         })
         .fail(function(e) {
             console.log(e);
@@ -1411,8 +1486,84 @@ WCSA.toggle_camera = function() {
 };
 
 WCSA.show_scope_pictures = function() {
+    var picont,
+        pic,
+        htmls;
+
+    // Display and hide content appropriately
     $('.scope_list').hide()
     $('.scope_survey').hide()
-    document.getElementById('pictures_footer').style.display = 'none';
+    document.getElementById('pictures_footer').style.display = ''; // Hidden by default
     $('.scope_pics').show();
+
+    // ajax call to load current pictures
+    // Needs to be asynchronous as the data may have changed on the survey page
+    $.ajax({
+        type: "POST",
+        url: WCSA.base_path + "inc/get_scope_pic_list.php",
+        dataType: "json", 
+        data: WCSA.id
+    })
+    .done(function(data) {
+        // target to generate pics within
+        picont = document.getElementById('scope_pics_contents');
+
+        if( jQuery.isEmptyObject(data) ) {
+            picont.innerHTML = '<div class="col-xs-12">No pictures</div>';
+        } else {
+            htmls = '';
+            for(pic in data) {
+                htmls += '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12"><div class="col-xs-12 col-xs-center">';
+                htmls += '<img class="thumbnail" src="' + WCSA.base_path + 'data/' + WCSA.id.project +
+                    '/' + WCSA.id.cemetery + 
+                    (WCSA.id.section ? '/' + WCSA.id.section : '') + 
+                    (WCSA.id.grave ? '/' + WCSA.id.grave : '') + 
+                    '/photographs/' + pic + '">';
+                htmls += '<div class="photo_info">' + data[pic].name + (data[pic].attribute ? ':<br>' + data[pic].attribute : '') + '</div>';
+                htmls += '</div></div>';
+            }
+            picont.innerHTML = htmls;
+        }
+    })
+    .fail(function(e) {
+        WCSA.error("Could not retrieve photographs list: " + e);
+    })
+};
+
+WCSA.bookmark = function() {
+    var e = document.getElementsByClassName('fa-bookmark-o');
+
+    // change the bookmark symbol to show it has been clicked
+    if( e.length > 0 ) {
+        e[0].classList.add('fa-bookmark');
+        e[0].classList.remove('fa-bookmark-o');
+    }
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: WCSA.base_path + "inc/bookmark.php",
+        data: {"op": "new", "data": WCSA.id}
+    })
+    .done(function(msg) {})
+    .fail(function(e) {
+        console.log(e);
+        WCSA.error("Unable to save bookmark due to: " + e);
+    });
+};
+
+WCSA.delete_bookmark = function(id) {
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: WCSA.base_path + "inc/bookmark.php",
+        data: {"op": "delete", "data": {"bid": id, "id": WCSA.id} }
+    })
+    .done(function(msg) {
+        window.location = '#bookmark'
+        location.reload();
+    })
+    .fail(function(e) {
+        WCSA.error("Unable to delete bookmark due to: " + e);
+    });
 }

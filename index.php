@@ -21,7 +21,8 @@
 
   </head>
   <body>
-    <header class="navbar navbar-full navbar-light navbar-static-top">
+    <!-- <header class="navbar navbar-full navbar-light navbar-static-top"> -->
+    <header class="navbar navbar-full navbar-light navbar-fixed-top">
         <div class="container correction">
             <nav class="navbar correction">
                 <div class="nav navbar-nav">
@@ -48,39 +49,64 @@ if ( $reqlen == 0 ) {
     // print header
     $path_sep = ' / ';
     $buildup_path = $wcsa->basepath;
-    $headtext = 
-        '<div class="nav-item"><a href="' . $buildup_path . '"><i class="fa fa-home" aria-hidden="true"></i></a></div>' .
-        '<div class="nav-item">';
+
+    # Make the sub heading text first then paste it in appropriately later
+    $subheadtext = '<div class="nav-sub-title"><a href="' . $buildup_path . '"><i class="fa fa-home" aria-hidden="true"></i></a> ';
 
     for( $i = 1; $i < $reqlen; $i += 2) {
         # Add url path to each section
         $buildup_path .= $reqp[$i - 1] . '/' . $reqp[$i] . '/';
-        $headtext .= '<a href="' . $buildup_path . '">' . $reqp[$i] . '</a>' . $path_sep;
+        $subheadtext .= '<a href="' . $buildup_path . '">' . $reqp[$i] . '</a>' . $path_sep;
     }
 
     # trim off the trainling separator ('/' or ':' or whtatever is being used as $path_sep)
-    $headtext = rtrim($headtext, $path_sep);
+    $subheadtext = rtrim($subheadtext, $path_sep);
 
-    # close the path nav-item
-    $headtext .= '</div>';
+    # close the sub heading
+    $subheadtext .= '</div>';
+
+    $headtext = 
+        '<div class="nav-item">' .
+        '<div class="nav-main-title">';
 
     # show other headings based on page/path
-    if( $reqlen == 4 && $reqp[2] == 'cemetery' ) {
+    if( $reqlen == 2 && $reqp[0] == 'editsurvey' ) {
+        # A bit different for this one than the others
+        $headtext .= 'Edit survey ' . $reqp[1] . '</div>' . 
+            '<div class="nav-sub-title"><a href="' . $wcsa->basepath . '"><i class="fa fa-home" aria-hidden="true"></i></a> ' . 
+            '<a href="' . $wcsa->basepath . 'surveys/' . $reqp[1] . '">' . $reqp[1] . '</a>' .
+            '</div></div>';
+        $headtext .= '<div title="Cemeteries list" class="nav-item pull-xs-right pointer"><a href="' . $wcsa->basepath . 'surveys/' . $reqp[1] . '"><i class="fa fa-th-large" aria-hidden="true"></i></a></div>';
+        $headtext .= '<div title="Edit survey" class="nav-item pull-xs-right pointer"><a href="' . $wcsa->basepath . 'editsurvey/' . $reqp[1] . '"><i class="fa fa-wrench" aria-hidden="true"></i></a></div>';
+    }
+    if( $reqlen == 2 && $reqp[0] == 'surveys' ) {
+        $headtext .= 'Project ' . $reqp[1] . '</div>' . $subheadtext . '</div>';
+        $headtext .= '<div title="Cemeteries list" onclick="WCSA.show_scope_contents(\'project\')" class="nav-item pull-xs-right pointer"><i class="fa fa-th-large" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Edit survey" class="nav-item pull-xs-right pointer"><a href="' . $wcsa->basepath . 'editsurvey/' . $reqp[1] . '"><i class="fa fa-wrench" aria-hidden="true"></i></a></div>';
+        $headtext .= '<div title="See bookmark for this survey project" onclick="WCSA.show_bookmarks()" class="nav-item pull-xs-right pointer"><i class="fa fa-bookmark" aria-hidden="true"></i></div>';
+    }
+    if( $reqlen == 4 && $reqp[2] == 'cemeteries' ) {
+        $headtext .= 'Cemetery ' . $reqp[3] . '</div>' . $subheadtext . '</div>';
         $headtext .= '<div title="Sections list" onclick="WCSA.show_scope_contents(\'cemetery\')" class="nav-item pull-xs-right pointer"><i class="fa fa-th-large" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Cemetery survey" onclick="WCSA.show_scope_survey(\'cemetery\')" class="nav-item pull-xs-right pointer"><i class="fa fa-file-text-o" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Cemetery pictures" onclick="WCSA.show_scope_pictures(\'cemetery\')" class="nav-item pull-xs-right pointer"><i class="fa fa-picture-o" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'cemetery\')" class="nav-item pull-xs-right pointer scope_survey"><i class="fa fa-camera" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Bookmark this cemetery" onclick="WCSA.bookmark(\'cemetery\')" class="nav-item pull-xs-right pointer"><i class="fa fa-bookmark-o" aria-hidden="true"></i></div>';
     }
-    if( $reqlen == 6 && $reqp[4] == 'section' ) {
+    if( $reqlen == 6 && $reqp[4] == 'sections' ) {
+        $headtext .= 'Section ' . $reqp[5] . '</div>' . $subheadtext . '</div>';
         $headtext .= '<div title="Graves list" onclick="WCSA.show_scope_contents(\'section\')" class="nav-item pull-xs-right pointer"><i class="fa fa-th" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Section survey" onclick="WCSA.show_scope_survey(\'section\')" class="nav-item pull-xs-right pointer"><i class="fa fa-file-text-o" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Section pictures" onclick="WCSA.show_scope_pictures(\'section\')" class="nav-item pull-xs-right pointer"><i class="fa fa-picture-o" aria-hidden="true"></i></div>';
-        $headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'cemetery\')" class="nav-item pull-xs-right pointer scope_survey"><i class="fa fa-camera" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'section\')" class="nav-item pull-xs-right pointer scope_survey"><i class="fa fa-camera" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Bookmark this section" onclick="WCSA.bookmark(\'section\')" class="nav-item pull-xs-right pointer"><i class="fa fa-bookmark-o" aria-hidden="true"></i></div>';
     }
-    if( $reqlen == 8 && $reqp[6] == 'grave' ) {
+    if( $reqlen == 8 && $reqp[6] == 'graves' ) {
+        $headtext .= 'Grave ' . $reqp[7] . '</div>' . $subheadtext . '</div>';
         $headtext .= '<div title="Grave survey" onclick="WCSA.show_scope_survey(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-file-text-o" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Grave pictures" onclick="WCSA.show_scope_pictures(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-picture-o" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-camera" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Bookmark this grave" onclick="WCSA.bookmark(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-bookmark-o" aria-hidden="true"></i></div>';
     }
 
     print($headtext);

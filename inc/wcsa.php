@@ -69,8 +69,11 @@ class wcsalib {
 
             case "surveys":
                 # Load survey in JS
-                print '<script type="text/javascript"> WCSA = {"survey": ' . $this->_load_json_survey($project, 'json') . '}; </script>'; 
+                print '<script type="text/javascript"> WCSA = {"survey": ' . $this->_load_json_survey($project, 'json') . ',' .
+                    '"id": {"scope": "section", "project": "' . $project . '"}' .
+                    '}; </script>'; 
                 $this->_show_cemeteries($project);
+                $this->_show_bookmarks($project);
                 break;
 
             default:
@@ -86,11 +89,11 @@ class wcsalib {
             $cemetery = array_shift($req_list);
 
             switch($activity_sub1) {
-            case 'cemetery':
+            case 'cemeteries':
                 print '<script type="text/javascript"> WCSA = {"survey": ' . $this->_load_json_survey($project, 'json') . ',' .
-                    '"id": {"scope": "cemetery", "cemetery": "' . $cemetery . '"}' .
+                    '"id": {"scope": "cemetery", "project": "' . $project . '", "cemetery": "' . $cemetery . '"}' .
                     '}; </script>'; 
-                $this->_show_sections($project, $cemetery);
+                $this->_show_cemetery_contents($project, $cemetery);
                 break;
 
             default:
@@ -107,11 +110,11 @@ class wcsalib {
             $section = array_shift($req_list);
 
             switch($activity_sub2) {
-            case 'section':
+            case 'sections':
                 print '<script type="text/javascript"> WCSA = {"survey": ' . $this->_load_json_survey($project, 'json') . ',' .
-                    '"id": {"scope": "cemetery", "cemetery": "' . $cemetery . '", "section": "' . $section . '"}' .
+                    '"id": {"scope": "section", "project": "' . $project . '", "cemetery": "' . $cemetery . '", "section": "' . $section . '"}' .
                     '}; </script>'; 
-                $this->_show_graves($project, $cemetery, $section);
+                $this->_show_section_contents($project, $cemetery, $section);
                 break;
 
             default:
@@ -130,11 +133,11 @@ class wcsalib {
             $grave = array_shift($req_list);
 
             switch($activity_sub3) {
-            case 'grave':
+            case 'graves':
                 print '<script type="text/javascript"> WCSA = {"survey": ' . $this->_load_json_survey($project, 'json') . ',' .
-                    '"id": {"scope": "cemetery", "cemetery": "' . $cemetery . '", "section": "' . $section . '", "grave": "' . $grave . '"}' .
+                    '"id": {"scope": "grave", "project": "' . $project . '", "cemetery": "' . $cemetery . '", "section": "' . $section . '", "grave": "' . $grave . '"}' .
                     '}; </script>'; 
-                $this->_show_grave($project, $cemetery, $section, $grave);
+                $this->_show_grave_contents($project, $cemetery, $section, $grave);
                 break;
             default:
                 print 'Unknown request structure in page_request() with eight variables.';
@@ -329,7 +332,25 @@ class wcsalib {
             break;
         }
     }
+    # Save the state of a scope item
+    private function _save_scope_state($scope, $identobj, $data) {
+        switch($scope) {
+        case 'cemetery':
+            file_put_contents($this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/' . $identobj['cemetery'] . '.json', json_encode($data, JSON_PRETTY_PRINT) );
+            break;
 
+        case 'section':
+            file_put_contents($this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/' . $identobj['section'] . '/' . $identobj['section'] . '.json', json_encode($data, JSON_PRETTY_PRINT) );
+            break;
+
+        case 'grave':
+            file_put_contents($this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/' . $identobj['section'] . '/' . $identobj['grave'] . '/' . $identobj['grave'] . '.json', json_encode($data, JSON_PRETTY_PRINT) );
+            break;
+
+        default:
+            print "Did not find requested json survey data.";
+        }
+    }
     # Get the data for this item (cem, section or grave)
     private function _load_scope_state($scope, $identobj) {
         switch($scope) {
@@ -363,7 +384,7 @@ class wcsalib {
         # if there are more than 1 tabs, build the tab system
         if( count($survey) > 1 ) {
             # Build tabs at top of page
-            print '<div class="row scope_survey">';
+            print '<div class="row scope_survey" style="' . ($scope === 'grave' ? 'display:        block':'') . '">';
             for( $tabnum = 0; $tabnum < count($survey); $tabnum += 1 ) {
                 $tabcolw = round(12/count($survey));
                 print '<div class="col-md-' . $tabcolw . ' col-xs-12 upper ttitle' . ($tabnum === 0 ? ' selected' : '') . '" onclick="WCSA.show_tab_section(this, \'tab_' . $tabnum . '\')">';
@@ -618,36 +639,46 @@ class wcsalib {
 
     # Generate the picture displays of photographs ASSOCIATED with this scope item
     private function _build_scope_pictures($scope, $cemetery, $section, $grave) {
+        print '<div class="row scope_pics"><div class="col-xs-12"><h2>Pictures</h2></div></div>';
+        print '<div id="scope_pics_contents" class="row scope_pics">';
+        # Pictures are retrieved asynchronously
 
-        print '<div class="row scope_pics">';
-
+        # Make sure that a photographs folder exists for this scope and create it if it doesn't yet exist
         switch( $scope ) {
         case 'cemetery':
-            # create photographs dir if it doesn't exist
             $pdir = $this->data . $this->project . '/' . $cemetery . '/photographs';
-            if( !file_exists($pdir)) {
-                mkdir($pdir);
-            }
-
-            # get contents of photographs directory
-            foreach( $this->_list_files($pdir) as $photo ) {
-                print $photo . '<br>';    
-            }
             break;
 
         case 'section':
-
+            $pdir = $this->data . $this->project . '/' . $cemetery . '/' . $section . '/photographs';
             break;
 
         case 'grave':
-
+            $pdir = $this->data . $this->project . '/' . $cemetery . '/' . $section . '/' . $grave . '/photographs';
             break;
 
         default:
             $this->send_error("Scope type not expected in build_scope_pictures().");
         }
 
-        print '</div>';
+        # Make the directory if it doesn't exist
+        if( !file_exists($pdir)) {
+            mkdir($pdir);
+        }
+
+        print '</div';
+    }
+
+    public function get_scope_photographs($idobj) {
+
+        # Load the data file for this scope item
+        $data = $this->_load_scope_state($idobj['scope'], $idobj);
+
+        if( !isset($data['photographs']) || count($data['photographs']) === 0 ) {
+            return '{}';
+        }
+
+        return json_encode($data['photographs'], JSON_PRETTY_PRINT);
     }
     
     # Returns the list of photographs in the unsorted photographs folder
@@ -731,16 +762,16 @@ class wcsalib {
     }
 
     # Show the contents of a grave
-    private function _show_grave($project, $cemetery, $section, $grave) {
+    private function _show_grave_contents($project, $cemetery, $section, $grave) {
         # build survey
         print $this->_build_scope_survey('grave', array( "project" => $project, "cemetery" => $cemetery, "section" => $section, "grave" => $grave) );
 
-        # build hidden pictures - but don't load pics - just paths
-        print $this->_build_scope_pictures('grave', $cemetery, $section, $grave);
+        # build hidden pictures 
+        print $this->_build_scope_pictures('cemetery', $cemetery, $section, $grave);
     }
 
-    # Show the contents of a section - the graves
-    private function _show_graves($project, $cemetery, $section) {
+    # Show the contents of a section
+    private function _show_section_contents($project, $cemetery, $section) {
         $glist = $this->_list_dir($this->data . $project . '/' . $cemetery . '/' . $section);
         if( $glist === false) { 
             print "Does not exists.";
@@ -753,7 +784,7 @@ class wcsalib {
         foreach($glist as $g) {
             print '<div class="col-md-3 col-xs-6">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemetery/' . $cemetery . '/section/' . $section . '/grave/' . $g .'">' . $g . '</a></div>' .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $section . '/graves/' . $g .'">' . $g . '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'grave\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $section . '\',\'' . $g . '\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
         }
@@ -766,11 +797,11 @@ class wcsalib {
         # build hidden survey
         print $this->_build_scope_survey('section', array( "project" => $project, "cemetery" => $cemetery, "section" => $section) );
 
-        # build hidden pictures - but don't load pics - just paths
-        print $this->_build_scope_pictures('section', $cemetery, $section, '');
+        # build hidden pictures 
+        print $this->_build_scope_pictures('cemetery', $cemetery, $section, '');
     }
 
-    private function _show_sections($project, $cemetery) {
+    private function _show_cemetery_contents($project, $cemetery) {
         $slist = $this->_list_dir($this->data . $project . '/' . $cemetery);
         if( $slist === false) { 
             print "Does not exists.";
@@ -783,7 +814,7 @@ class wcsalib {
         foreach($slist as $s) {
             print '<div class="col-md-3 col-xs-6">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemetery/' . $cemetery . '/section/' . $s .'">' . $s . '</a></div>' .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $s .'">' . $s . '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'section\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $s . '\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
         }
@@ -796,7 +827,7 @@ class wcsalib {
         # build hidden survey
         print $this->_build_scope_survey('cemetery', array( "project" => $project, "cemetery" => $cemetery) );
 
-        # build hidden pictures - but don't load pics - just paths
+        # build hidden pictures 
         print $this->_build_scope_pictures('cemetery', $cemetery, '', '');
     }
 
@@ -809,7 +840,7 @@ class wcsalib {
         foreach($clist as $c) {
             print '<div class="col-md-3 col-xs-6">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemetery/' . $c .'">' . $c . '</a></div>' .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c . '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'cemetery\',\'' . $project . '\',\'' . $c . '\',\'\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
         }
@@ -828,8 +859,8 @@ class wcsalib {
             foreach($surveys as $surv) {
                 print '<div class="col-md-3 col-xs-6">' .
                     '<div class="row">' .
-                    '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $surv . '">' . $surv . '</a></div>' .
-                    '<div class="col-xs-3 item left-div"><a class="link_item" href="' . $this->basepath . 'editsurvey/' . $surv . '"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
+                    '<div class="col-xs-10 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $surv . '">' . $surv . '</a></div>' .
+                    #'<div class="col-xs-3 item left-div"><a class="link_item" href="' . $this->basepath . 'editsurvey/' . $surv . '"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                     '</div></div>';
             }
             print '</div>';
@@ -915,6 +946,118 @@ class wcsalib {
             $htmls .= '</form>';
         }
         return($htmls);
+    }
+    public function associate_photo($data) {
+
+        # we want to update the json data for this scope item
+        $state = $this->_load_scope_state($data['id']['scope'], $data['id']);
+        # if the data doesn't have a photography array yet, create it
+        if( !isset($state['photographs']) ) { $state['photographs'] = array(); }
+
+        # data['id'] has scope, cemtery, section, grave identifiers as necessary
+        # data['picture'] is the photgraph file naem
+        # data['name'] is the category name
+        # data['attribute'] is the optional/possible attribute name for this category
+        
+        # Update the json data
+        if( isset($data['attribute']) ) {
+            $state['photographs'][$data['picture']] = array("name" => $data['name'], "attribute" => $data['attribute']);
+        } else {
+            $state['photographs'][$data['picture']] = array("name" => $data['name']);
+        }
+
+        switch($data['id']['scope']) {
+        case 'cemetery':
+            # Move the photograph
+            rename($this->photo_dir . $data['picture'], $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/photographs/' . $data['picture']);
+            break;
+
+        case 'section':
+            # Move the photograph
+            rename($this->photo_dir . $data['picture'], $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/photographs/' . $data['picture']);
+            break;
+
+        case 'grave':
+            # Move the photograph
+            rename($this->photo_dir . $data['picture'], $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/' . $data['id']['grave'] . '/photographs/' . $data['picture']);
+            break;
+
+        default:
+            $this->send_error("Unable to find proper scope to relocate photograph.");
+        }
+
+        # Save the update state data
+        $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
+
+        return true;
+    }
+
+    private function _show_bookmarks($project) {
+        # bookmark file path
+        $bmfp = $this->data . $project . '/bookmarks.json';
+
+        print '<div class="row bookmarks_list"><h2 class="col-xs-12 correction">Bookmarks</h2></div>';
+        if( file_exists($bmfp) ) {
+            $bookmarks = json_decode(file_get_contents( $bmfp ), true);
+
+            print '<div class="row bookmarks_list">';
+            # Iterate through bookmarks
+            for($i = 0; $i < count($bookmarks); $i += 1 ) {
+                $bm = $bookmarks[$i];
+
+                print '<div class="col-lg-4 col-sm-6 col-xs-12">' . 
+                    '<div class="row"><div class="col-sm-9 col-xs-8 item">' .
+                    '<a class="link_item" href="' . $this->basepath . 'surveys/' . $project . 
+                    '/cemeteries/' . $bm['cemetery'] . 
+                    ( $bm['section'] !== '' ? '/sections/' . $bm['section'] : '' ) .
+                    ( $bm['grave'] !== '' ? '/graves/' . $bm['grave'] : '' ) . '">' .
+                    $bm['cemetery'] . ' ' . $bm['section'] . ' ' . $bm['grave'] .
+                    '</a>' . 
+                    '</div>' .
+                    '<div class="col-sm-2 col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.delete_bookmark(' . $i . ')"><i class="fa fa-trash" aria-hidden="true"></i></a></div>' . 
+                    '</div></div>';
+            }
+            print '</div>';
+        }
+    }
+
+    public function add_bookmark($identobj) {
+        $bmfp = $this->data . $identobj['project'] . '/bookmarks.json';
+
+        # Get existing bookmarks or create new array
+        if( file_exists($bmfp) ) {
+            $bookmarks = json_decode(file_get_contents( $bmfp ), true);
+        } else {
+            $bookmarks = array();
+        }
+
+        # Add new bookmark
+        array_push($bookmarks, array(
+            'scope' => $identobj['scope'],
+            'cemetery' => $identobj['cemetery'],
+            'section' => ( isset($identobj['section']) ? $identobj['section'] : ''),
+            'grave' => ( isset($identobj['grave']) ? $identobj['grave'] : '') 
+        ));
+
+        # save data
+        return file_put_contents($bmfp, json_encode($bookmarks, JSON_PRETTY_PRINT) );
+    }
+
+    public function delete_bookmark($data) {
+        $bmfp = $this->data . $data['id']['project'] . '/bookmarks.json';
+        if( file_exists($bmfp) ) {
+            $bookmarks = json_decode(file_get_contents( $bmfp ), true);
+        } else {
+            return true;
+        }
+
+        # delete
+        unset($bookmarks[$data['bid']]);
+        # To prevent associative array creation by unset-ing
+        $bookmarks = array_values($bookmarks);
+
+        # save data
+        return file_put_contents($bmfp, json_encode($bookmarks, JSON_PRETTY_PRINT) );
     }
 }
 
