@@ -395,7 +395,8 @@ class wcsalib {
     # Publish the survey form for this scope with the current state of the data
     private function _build_scope_survey($scope, $identobj) {
         # Starts content generation in a row div
-        $survey = $this->_load_json_survey($this->project)[$scope];
+        $survey = $this->_load_json_survey($this->project);
+        $survey = (isset($survey[$scope]) ? $survey[$scope] : array());
         $state = $this->_load_scope_state($scope, $identobj);
 
         # $survey is an array of tabs

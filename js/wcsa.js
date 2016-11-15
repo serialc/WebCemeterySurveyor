@@ -1289,7 +1289,7 @@ WCSA.toggle_attribute = function(scope, project, cemetery, section, grave, data_
             if( document.getElementById(name + '_' + value).classList.contains('selected') ) {
                 document.getElementById(name + '_' + value).classList.remove('selected');
             } else {
-                $('.radio_thumbnail_' + name).removeClass('selected');
+                $('.' + data_type + '_' + name).removeClass('selected');
                 document.getElementById(name + '_' + value).classList.add('selected');
             }
 
