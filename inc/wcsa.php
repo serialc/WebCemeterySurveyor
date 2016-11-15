@@ -164,11 +164,17 @@ class wcsalib {
 
     public function create_new_survey($name) {
         # create dir if it does not exist
-        if( mkdir($this->data . $name) ) {
-            # create basic json file and save it in new dir
-            $this->_save_json_survey( $name, array('_type' => 'root', 'cemetery' => array(), 'section' => array(), 'grave' => array()) );
+        $fp = $this->data . $name;
+
+        if( is_writable($this->data) ) {
+            if( mkdir($fp) ) {
+                # create basic json file and save it in new dir
+                $this->_save_json_survey( $name, array('_type' => 'root', 'cemetery' => array(), 'section' => array(), 'grave' => array()) );
+            } else {
+                $this->send_error("DUPLICATE ERROR: Survey name already exists.");
+            }
         } else {
-            $this->send_error("DUPLICATE ERROR: Survey name already exists.");
+            $this->send_error("NO WRITING PERMISSION: Cannot create folders/files.");
         }
     }
 

@@ -126,9 +126,8 @@ if ( $reqlen == 0 ) {
 <?php
 
 # Get the path parts
-$req = $_GET['request'];
-$arr = get_defined_vars();
-#print(nl2br(print_r($req, true)));
+#$req = isset($_GET['request']) ? $_GET['request'] : '';
+# Above code is already called earlier in index.php
 
 $wcsa->page_request(explode('/', rtrim($req, '/')));
 
