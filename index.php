@@ -27,10 +27,11 @@
             <nav class="navbar correction">
                 <div class="nav navbar-nav">
 <?php
-# Provide appropriate header
+date_default_timezone_set("UTC");
 
 require('inc/wcsa.php');
 
+# Provide appropriate header
 $req = $_GET['request'];
 
 # Get the request parts
