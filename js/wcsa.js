@@ -281,13 +281,22 @@ WCSA.survey_toggle_stgq_view = function(event, uid, hierarch) {
                         // uses true/false, no input needed
                         break;
                     case 'measurement':
-                        // simple input for number
+                        // will use input for number
                         break;
                     case 'text':
-                        // simple input for text
+                        // will use input for number
                         break;
                     default:
                         htmls += 'Bad data type for ' + item.title;
+                }
+
+                // dependency option. Only appears if this is a radio button and there is another group below it
+                if( item.data_type === 'radio' && WCSA.survey[scope][tindex]['contents'].length > (gindex + 1) ) {
+                    htmls += '<div class="row"><div class="col-md-6">';
+                    htmls += WCSA.format_input('dependency', 'Dependency attribute', (item.dependency ? item.dependency : ''), 'e.g., ' + item.attributes.join(', '), 'text', 'Selection of this attribute will hide groups below');
+                    htmls += '</div><div class="col-md-6">';
+                    htmls += WCSA.format_input('dependency_num', 'Dependency groups hidden', (item.dependency_num ? item.dependency_num : ''), 'e.g., 1,2,3', 'number', 'The number of groups that will be hidden');
+                    htmls += '</div></div>';
                 }
 
                 // camera
@@ -506,6 +515,13 @@ WCSA.get_survey = function(project, force) {
 
 // Update to show info to user in a 'friendly' way
 WCSA.error = function(msg) {
+    var wb = document.getElementById('error_header'),
+        wc = document.getElementById('error_header_content');
+
+    wc.innerHTML = msg;
+    wb.style.display = 'block';
+    setTimeout(function() {$('#error_header').fadeOut('slow')}, 5000);
+
     // Need to make this show up for the user
     console.log(msg)
     // Show a header briefly with error message
@@ -1175,7 +1191,7 @@ WCSA.delete_survey_item = function(event, uid) {
 
             // After the modal appears do the following...
             $('#main_modal').on('hidden.bs.modal', function () {
-                // disable click
+                // disable click event - otherwise we get modal freeze
                 $('.btn-primary', '#main_modal').html('Submit').off('click');
                 // update html
                 WCSA.survey_toggle_stgq_view(null, scope + '_' + tindex + '_' + gindex, 'sgroup');
@@ -1572,3 +1588,70 @@ WCSA.delete_bookmark = function(id) {
         WCSA.error("Unable to delete bookmark due to: " + e);
     });
 }
+
+WCSA.delete_scope = function(scope) {
+
+    $('.modal-title', '#main_modal').html('<h2>Are you sure you want to delete this ' + scope + '?</h2>');
+    $('.modal-body', '#main_modal').html('<p>This deletion cannot be undone</p>');
+
+    // on submit handler
+    $('.btn-primary', '#main_modal').html('Delete').click(function() {
+        // delete from server
+        $.ajax({
+            type: "POST",
+            dataType: "json", // need to respond with valid json response and having trouble with this
+            url: WCSA.base_path + "inc/delete_scope.php",
+            data: {"scope": scope,
+                "id": WCSA.id
+            }
+        })
+        .done(function(msg) {
+            window.location = WCSA.base_path + 'surveys/' + WCSA.id.project + '/cemeteries/' + WCSA.id.cemetery + '/sections/' + WCSA.id.section;
+        })
+        .fail(function(e) {
+            WCSA.error('Unable to delete ' + scope);
+            console.log(e);
+        });
+
+        // hide the modal
+        $('#main_modal').modal('toggle');
+
+        // go back to higher level scope
+
+    });
+
+    // After the modal appears do the following...
+    $('#main_modal').on('hidden.bs.modal', function () {
+        // disable click event - otherwise we get modal freeze next time we use the modal
+        $('.btn-primary', '#main_modal').html('Submit').off('click');
+    });
+
+    // Show the modal
+    $('#main_modal').modal('toggle');
+};
+
+WCSA.toggle_dependency_visibility = function(attrib_id, group_id, group_num) {
+    var new_state,
+        target_group,
+        target_group_id;
+
+    // Do we show or hide the dependent group?
+    if( document.getElementById(attrib_id).classList.contains('selected') ) {
+        // hide the target group
+        new_state = 'none';
+    } else {
+        // show the target group
+        new_state = '';
+    }
+
+    // Check the number is sane
+    if(group_num === '' || group_num < 1 ) {
+        WCSA.error("Group dependency question has an invalid number of groups number to hide: " + group_num + ". Edit your survey and set it to an integer greater than 0.");
+        return;
+    }
+
+    // Go through the groups hiding or showing them
+    for( target_group_id = group_id + 1; target_group_id <= group_id + group_num; target_group_id += 1 ) {
+        document.getElementById('group_' + target_group_id).style.display = new_state;
+    }
+};

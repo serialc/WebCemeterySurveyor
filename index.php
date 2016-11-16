@@ -106,8 +106,9 @@ if ( $reqlen == 0 ) {
         $headtext .= 'Grave ' . $reqp[7] . '</div>' . $subheadtext . '</div>';
         $headtext .= '<div title="Grave survey" onclick="WCSA.show_scope_survey(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-file-text-o" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Grave pictures" onclick="WCSA.show_scope_pictures(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-picture-o" aria-hidden="true"></i></div>';
-        $headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-camera" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'grave\')" class="nav-item pull-xs-right pointer scope_survey"><i class="fa fa-camera" aria-hidden="true"></i></div>';
         $headtext .= '<div title="Bookmark this grave" onclick="WCSA.bookmark(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-bookmark-o" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Delete grave" onclick="WCSA.delete_scope(\'grave\')" class="nav-item pull-xs-right pointer"><i class="fa fa-trash-o" aria-hidden="true"></i></div>';
     }
 
     print($headtext);
@@ -119,6 +120,7 @@ if ( $reqlen == 0 ) {
 ?>
                 </div>
             </nav>
+            <div id="error_header"><div id="error_header_content" class="container">Error</div></div>
         </div>
     </header>
     <div id="main-content">

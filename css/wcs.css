@@ -31,6 +31,14 @@ header {
   header a:hover {
     color: #BBDEFB; }
 
+#error_header {
+  display: none;
+  background-color: #c9302c;
+  color: white;
+  width: 100%;
+  z-index: 2000;
+  opacity: 0.8; }
+
 .nav-main-title {
   font-size: 0.7em; }
 

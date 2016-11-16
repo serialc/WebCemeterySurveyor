@@ -28,7 +28,7 @@ class wcsalib {
             mkdir($this->data);
         } 
 
-        # Check photo dir exists and create it if not
+        # Check that general photo dir exists and create it if not
         $this->photo_dir = 'photographs/';
         if (!file_exists($this->photo_dir)) {
             mkdir($this->photo_dir);
@@ -373,22 +373,33 @@ class wcsalib {
     }
     # Get the data for this item (cem, section or grave)
     private function _load_scope_state($scope, $identobj) {
+
+        # base path
+        $fp = $this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/';
+
+        # add to base path based on scope
         switch($scope) {
         case 'cemetery':
-            return( json_decode( file_get_contents($this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/' . $identobj['cemetery'] . '.json'), true) );
+            $fp .= $identobj['cemetery'] . '.json';
             break;
 
         case 'section':
-            return( json_decode( file_get_contents($this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/' . $identobj['section'] . '/' . $identobj['section'] . '.json'), true) );
+            $fp .= $identobj['section'] . '/' . $identobj['section'] . '.json';
             break;
 
         case 'grave':
-            return( json_decode( file_get_contents($this->data . $identobj['project'] . '/' . $identobj['cemetery'] . '/' . $identobj['section'] . '/' . $identobj['grave'] . '/' . $identobj['grave'] . '.json'), true) );
+            $fp .= $identobj['section'] . '/' . $identobj['grave'] . '/' . $identobj['grave'] . '.json';
             break;
 
         default:
             print "Did not find requested json survey data.";
         }
+
+        # check that the file exists
+        if( file_exists($fp) ) {
+            return( json_decode( file_get_contents($fp), true) );
+        }
+
         return false;
     }
 
@@ -399,8 +410,11 @@ class wcsalib {
         $survey = (isset($survey[$scope]) ? $survey[$scope] : array());
         $state = $this->_load_scope_state($scope, $identobj);
 
-        # $survey is an array of tabs
-        #print(nl2br(print_r( $survey, true)));
+        if( $state === false ) {
+            # Bad URL most likely
+            print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
+            return;
+        }
 
         # if there are more than 1 tabs, build the tab system
         if( count($survey) > 1 ) {
@@ -428,13 +442,27 @@ class wcsalib {
 
             print '<div id="tab_' . $tabnum . '" class="col-xs-12 tabsection' . ($tabnum !== 0 ? ' hide':'') . '">';
 
+            # Used to set dependency visibility state
+            $dependency_groups_to_hide = array();
+
             # go through the groups in this tab
-            foreach( $tab['contents'] as $group ) {
+            for( $grpnum = 0; $grpnum < count($tab['contents']); $grpnum += 1 ) {
+                $group = $tab['contents'][$grpnum];
+
+                if( in_array( $grpnum, $dependency_groups_to_hide ) ) {
+                    print '<div id="group_' . $grpnum . '" style="display:none">';
+                } else {
+                    print '<div id="group_' . $grpnum . '">';
+                }
+
+                # Create group heading
                 if( $group['title'] !== '' ) {
                     print '<div class="col-xs-12 gtitle"><h2>' . $group['title'] . '</h2></div>';
                 }
 
-                foreach( $group['contents'] as $cat ) {
+
+                for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
+                    $cat = $group['contents'][$catnum];
                     
                     # required question?
                     $required = '';
@@ -456,7 +484,6 @@ class wcsalib {
                     case 'set':
                         # Display all the set values as a series of checkboxes or buttons
                         print '<div class="row">';
-
                         # Go through each attribute for this questions/category
                         foreach( $cat['attributes'] as $seti ) {
                             # check if data exists for this
@@ -476,6 +503,7 @@ class wcsalib {
                                                             $cat['name'] . '\',\'' . 
                                                             $seti . '\')' .
                                 '">' . $seti . '</div></div>';
+
                         }
 
                         print '</div>';
@@ -522,6 +550,7 @@ class wcsalib {
                             }
                             # Add the onclick here
                             print '<div class="col-xs-12 col-md-3' . ($cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . ' radio_' . $cat['name'] . '" onclick="' .
+
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
@@ -529,8 +558,18 @@ class wcsalib {
                                                             (isset($identobj['grave']) ? $identobj['grave'] : '')  . '\',\'' .
                                                             'radio\',\'' . 
                                                             $cat['name'] . '\',\'' . 
-                                                            $seti . '\')' .
+                                                            $seti . '\');' .
+
+                                'WCSA.toggle_dependency_visibility(\'' . $cat['name'] . '_' . $cat['dependency'] . '\',' . $catnum . ',' . $cat['dependency_num'] . ')' . 
+
                                 '">' . $seti . '</div></div>';
+
+                            # See if any dependency hiding is enabled and store group name(s) to set their state when generating
+                            if( $cat['dependency'] === $seti && $selected === 'selected' && $cat['dependency_num'] > 0 ) {
+                                for( $i = $grpnum + 1; $i <= $grpnum + $cat['dependency_num']; $i += 1 ) {
+                                    array_push($dependency_groups_to_hide, $i);
+                                }
+                            }
                         }
                         #print(nl2br(print_r($cat, true)));
                         print '</div>';
@@ -650,6 +689,8 @@ class wcsalib {
                     }
                     print '</div></div>';
                 }
+                # close group
+                print '</div>';
             }
             # close tabs
             print '</div>';
@@ -687,7 +728,7 @@ class wcsalib {
             mkdir($pdir);
         }
 
-        print '</div';
+        print '</div>';
     }
 
     public function get_scope_photographs($idobj) {
@@ -784,18 +825,23 @@ class wcsalib {
 
     # Show the contents of a grave
     private function _show_grave_contents($project, $cemetery, $section, $grave) {
+        if( !file_exists($this->data . $project . '/' . $cemetery . '/' . $section . '/' . $grave) ) {
+            print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
+            return false;
+        }
+
         # build survey
         print $this->_build_scope_survey('grave', array( "project" => $project, "cemetery" => $cemetery, "section" => $section, "grave" => $grave) );
 
         # build hidden pictures 
-        print $this->_build_scope_pictures('cemetery', $project, $cemetery, $section, $grave);
+        print $this->_build_scope_pictures('grave', $project, $cemetery, $section, $grave);
     }
 
     # Show the contents of a section
     private function _show_section_contents($project, $cemetery, $section) {
         $glist = $this->_list_dir($this->data . $project . '/' . $cemetery . '/' . $section);
         if( $glist === false) { 
-            print "Does not exists.";
+            print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
             return false;
         }
 
@@ -825,7 +871,7 @@ class wcsalib {
     private function _show_cemetery_contents($project, $cemetery) {
         $slist = $this->_list_dir($this->data . $project . '/' . $cemetery);
         if( $slist === false) { 
-            print "Does not exists.";
+            print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
             return false;
         }
 
@@ -1079,6 +1125,35 @@ class wcsalib {
 
         # save data
         return file_put_contents($bmfp, json_encode($bookmarks, JSON_PRETTY_PRINT) );
+    }
+
+    # Delete a scope item (only grave for now/ever)
+    public function delete_scope($data) {
+        switch($data['scope']) {
+            case 'grave':
+                $gpath = $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/' . $data['id']['grave'] . '/';
+
+                # Move any photographs that may exist to the general unsorted photos
+                $photos = $this->_list_files($gpath . 'photographs');
+                for( $p = 0; $p < count($photos); $p += 1) {
+                    rename($gpath . 'photographs/' . $photos[$p], $this->photo_dir . $photos[$p]);
+                }
+                $del_pdir = rmdir($gpath . 'photographs');
+                $del_dfile = unlink($gpath . $data['id']['grave'] . '.json');
+                $del_grave = rmdir($gpath);
+                
+                # everything is okay
+                if( $del_pdir && $del_dfile && $del_grave ) {
+                    return true;
+                } else {
+                    $this->send_error("Could not delete " . data['scope'] . " correctly");
+                }
+                break;
+
+            default:
+                $this->send_error("Deletion of scopes other than 'grave' is not implemented");
+
+        }
     }
 }
 
