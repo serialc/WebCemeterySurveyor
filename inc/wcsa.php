@@ -532,7 +532,7 @@ class wcsalib {
                                 $selected = 'selected';
                             }
                             # Add the onclick here
-                            print '<div class="col-xs-12 col-md-3' . ($cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $tn . '"><div id="' . $cat['name'] . '_' . $tn . '" class="col-xs-12 col-md-12 citem ' . $selected . ' set_thumbnail_' . $cat['name'] . '" onclick="' .
+                            print '<div class="col-xs-12 col-md-3' . (isset($cat['attrib_camera']) && ($cat['attrib_camera'] === 'true') ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $tn . '"><div id="' . $cat['name'] . '_' . $tn . '" class="col-xs-12 col-md-12 citem ' . $selected . ' set_thumbnail_' . $cat['name'] . '" onclick="' .
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
@@ -603,7 +603,7 @@ class wcsalib {
                                 $selected = 'selected';
                             }
                             # Add the onclick here
-                            print '<div class="col-xs-12 col-md-3' . ($cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $tn . '"><div id="' . $cat['name'] . '_' . $tn . '" class="col-xs-12 col-md-12 citem ' . $selected . ' radio_thumbnail_' . $cat['name'] . '" onclick="' .
+                            print '<div class="col-xs-12 col-md-3' . (isset($cat['attrib_camera']) && ($cat['attrib_camera'] === 'true') ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $tn . '"><div id="' . $cat['name'] . '_' . $tn . '" class="col-xs-12 col-md-12 citem ' . $selected . ' radio_thumbnail_' . $cat['name'] . '" onclick="' .
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
