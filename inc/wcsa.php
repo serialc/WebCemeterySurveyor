@@ -462,7 +462,7 @@ class wcsalib {
                 # Create group heading
                 if( $group['title'] !== '' ) {
                     print '<div class="col-xs-12 gtitle"><h2>' . $group['title'] . '</h2></div>';
-                } else {
+                }
 
                 # Go through the questions in the group
                 for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
@@ -700,7 +700,6 @@ class wcsalib {
                         print "Unknown data_type for this survey item - JSON is misformed?";
                     }
                     print '</div></div>';
-                    
                 }
                 # close group
                 print '</div>';
