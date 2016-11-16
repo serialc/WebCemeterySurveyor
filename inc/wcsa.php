@@ -464,7 +464,7 @@ class wcsalib {
                     print '<div class="col-xs-12 gtitle"><h2>' . $group['title'] . '</h2></div>';
                 }
 
-
+                # Go through the questions in the group
                 for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
                     $cat = $group['contents'][$catnum];
                     
@@ -477,7 +477,7 @@ class wcsalib {
                     print '<div id="cat_' . $cat['name'] . '">';
                     if( !in_array($cat['data_type'], array('text','measurement')) ) {
                         # Give titles dropzone ability if indicated
-                        print '<div class="col-xs-12 ctitle' . ($cat['camera'] === 'true' ? ' dropzone' :  '') . '" id="' . $cat['name'] . '"><h3 class="' . $required . '">' . $cat['title'] . '</h3></div>';
+                        print '<div class="col-xs-12 ctitle' . (isset($cat['camera']) && $cat['camera'] === 'true' ? ' dropzone' :  '') . '" id="' . $cat['name'] . '"><h3 class="' . $required . '">' . $cat['title'] . '</h3></div>';
                     }
 
                     print '<div class="col-xs-12 ccontents">';
@@ -497,7 +497,7 @@ class wcsalib {
                             }
                             # Add the onclick here
                             # Give attributes dropzone ability if indicated
-                            print '<div class="col-xs-12 col-md-3' . ($cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . '" onclick="' .
+                            print '<div class="col-xs-12 col-md-3' . (isset($cat['attrib_camera'] && $cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . '" onclick="' .
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
@@ -517,6 +517,11 @@ class wcsalib {
                         # Display all the set values as a series of checkboxes or buttons
                         print '<div class="row">';
 
+                        # Give warning if no pictures were found
+                        if( !file_exists('thumbnails/' . $cat['attributes']) ) {
+                            print 'Did not find any thumbnail images in the folder \'' . $cat['attributes'] . '\'.';
+                            continue;
+                        }
                         # Get the list of files in the directory
                         $thumbs = $this->_list_files('thumbnails/' . $cat['attributes'] . '/');
                         foreach( $thumbs as $tn ) {
@@ -553,7 +558,7 @@ class wcsalib {
                                 $selected = 'selected';
                             }
                             # Add the onclick here
-                            print '<div class="col-xs-12 col-md-3' . ($cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . ' radio_' . $cat['name'] . '" onclick="' .
+                            print '<div class="col-xs-12 col-md-3' . (isset($cat['attrib_camera']) && $cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . ' radio_' . $cat['name'] . '" onclick="' .
 
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
@@ -585,6 +590,7 @@ class wcsalib {
                         # Give warning if no pictures were found
                         if( !file_exists('thumbnails/' . $cat['attributes']) ) {
                             print 'Did not find any thumbnail images in the folder \'' . $cat['attributes'] . '\'.';
+                            continue;
                         }
                         # Get the list of files in the directory
                         $thumbs = $this->_list_files('thumbnails/' . $cat['attributes']);
@@ -659,7 +665,7 @@ class wcsalib {
                                                             'onclick="this.focus()"',
                             $cat['required'] === 'true',
                             false,  # inline
-                            $cat['camera'] === 'true' # dropzone
+                            isset($cat['camera']) && ($cat['camera'] === 'true') # dropzone
                         );
                         print '</div></div>';
                         break;
@@ -683,7 +689,7 @@ class wcsalib {
                                                             'onclick="this.focus()"',
                             $cat['required'] === 'true',
                             false, # inline
-                            $cat['camera'] === 'true' #dropzone
+                            isset($cat['camera']) && ($cat['camera'] === 'true') #dropzone
                         );
                         print '</div></div>';
                         break;
@@ -803,7 +809,7 @@ class wcsalib {
             if( $data_type === 'binary' ) {
                 # convert strings to boolean
                 $data[$name] = ($value === 'true');
-            } elseif ( ($data_type === 'radio' || $data_type === 'radio_thumbnail') && $data[$name] === $value ) {
+            } elseif ( ($data_type === 'radio' || $data_type === 'radio_thumbnail') && isset($data[$name]) && $data[$name] === $value ) {
                 #$data[$name] = '';
                 unset($data[$name]);
             } else {
