@@ -875,7 +875,7 @@ class wcsalib {
             $reqname = $this->_determine_missing_required_questions($reqname, $state);
             $reqnum_missing = count($reqname);
 
-            print '<div class="col-md-3 col-xs-6">' .
+            print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
                 '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $section . '/graves/' . $g .'">' . $g . 
                 ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum_missing) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
@@ -924,7 +924,7 @@ class wcsalib {
             $reqname = $this->_determine_missing_required_questions($reqname, $state);
             $reqnum_missing = count($reqname);
 
-            print '<div class="col-md-3 col-xs-6">' .
+            print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
                 '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $s .'">' . $s . 
                 ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum - $reqnum_found) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
@@ -974,7 +974,7 @@ class wcsalib {
             $reqname = $this->_determine_missing_required_questions($reqname, $state);
             $reqnum_missing = count($reqname);
 
-            print '<div class="col-md-3 col-xs-6">' .
+            print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
                 '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
                 ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum - $reqnum_found) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
