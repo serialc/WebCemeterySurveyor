@@ -28,6 +28,10 @@ class wcsalib {
             mkdir($this->data);
         } 
 
+        # Check that general thumbnails dir exists and create it if not
+        if (!file_exists('thumbnails/')) {
+            mkdir('thumbnails/');
+        } 
         # Check that general photo dir exists and create it if not
         $this->photo_dir = 'photographs/';
         if (!file_exists($this->photo_dir)) {
@@ -221,7 +225,7 @@ class wcsalib {
                     print("ERROR - Malformed JSON file.");
                 }
             } else {
-                print("Project doesn't exist.");
+                print("Project doesn't exist.<br>");
                 $this->jdata = false;
             }
         }
@@ -560,12 +564,12 @@ class wcsalib {
                                                             $cat['name'] . '\',\'' . 
                                                             $seti . '\');' .
 
-                                'WCSA.toggle_dependency_visibility(\'' . $cat['name'] . '_' . $cat['dependency'] . '\',' . $catnum . ',' . $cat['dependency_num'] . ')' . 
+                                (isset($cat['dependency']) ? 'WCSA.toggle_dependency_visibility(\'' . $cat['name'] . '_' . $cat['dependency'] . '\',' . $catnum . ',' . $cat['dependency_num'] . ')' : '') . 
 
                                 '">' . $seti . '</div></div>';
 
                             # See if any dependency hiding is enabled and store group name(s) to set their state when generating
-                            if( $cat['dependency'] === $seti && $selected === 'selected' && $cat['dependency_num'] > 0 ) {
+                            if( isset($cat['dependency']) && $cat['dependency'] === $seti && $selected === 'selected' && $cat['dependency_num'] > 0 ) {
                                 for( $i = $grpnum + 1; $i <= $grpnum + $cat['dependency_num']; $i += 1 ) {
                                     array_push($dependency_groups_to_hide, $i);
                                 }
@@ -799,6 +803,9 @@ class wcsalib {
             if( $data_type === 'binary' ) {
                 # convert strings to boolean
                 $data[$name] = ($value === 'true');
+            } elseif ( ($data_type === 'radio' || $data_type === 'radio_thumbnail') && $data[$name] === $value ) {
+                #$data[$name] = '';
+                unset($data[$name]);
             } else {
                 $data[$name] = $value;
             }
@@ -820,7 +827,9 @@ class wcsalib {
 
         default:
             print "Did not find scope in submit_data().";
+            return false;
         }
+        return true;
     }
 
     # Show the contents of a grave
@@ -840,18 +849,37 @@ class wcsalib {
     # Show the contents of a section
     private function _show_section_contents($project, $cemetery, $section) {
         $glist = $this->_list_dir($this->data . $project . '/' . $cemetery . '/' . $section);
+
         if( $glist === false) { 
             print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
             return false;
         }
 
+        # For completion info - give completion state of each cemetery's survey
+        $survey = $this->_load_json_survey($this->project);
+        $survey = (isset($survey['grave']) ? $survey['grave'] : array());
+
+        $reqname = $this->_get_scope_required_questions($survey);
+        $reqnum = count($reqname);
+
         print '<div class="row scope_list"><h2 class="col-xs-12 correction">Graves for section ' . $section . '</h2></div>';
 
+        $reqnum_found = 0;
         print '<div class="row scope_list">';
         foreach($glist as $g) {
+
+            # Get the data for this cemetery and see how many of the required fields in the $survey are present the state data
+            $state = $this->_load_scope_state('grave', array("project" => $project, "cemetery" => $cemetery, "section" => $section, "grave" => $g) );
+
+            # Use $reqname and compare with $state to determine score
+            $reqname = $this->_determine_missing_required_questions($reqname, $state);
+            $reqnum_missing = count($reqname);
+
             print '<div class="col-md-3 col-xs-6">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $section . '/graves/' . $g .'">' . $g . '</a></div>' .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $section . '/graves/' . $g .'">' . $g . 
+                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum_missing) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
+                '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'grave\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $section . '\',\'' . $g . '\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
         }
@@ -870,18 +898,37 @@ class wcsalib {
 
     private function _show_cemetery_contents($project, $cemetery) {
         $slist = $this->_list_dir($this->data . $project . '/' . $cemetery);
+
         if( $slist === false) { 
             print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
             return false;
         }
 
+        # For completion info - give completion state of each cemetery's survey
+        $survey = $this->_load_json_survey($this->project);
+        $survey = (isset($survey['section']) ? $survey['section'] : array());
+
+        $reqname = $this->_get_scope_required_questions($survey);
+        $reqnum = count($reqname);
+
         print '<div class="row scope_list"><h2 class="col-xs-12 correction">Sections for cemetery ' . $cemetery . '</h2></div>';
 
+        $reqnum_found = 0;
         print '<div class="row scope_list">';
         foreach($slist as $s) {
+
+            # Get the data for this cemetery and see how many of the required fields in the $survey are present the state data
+            $state = $this->_load_scope_state('section', array("project" => $project, "cemetery" => $cemetery, "section" => $s) );
+
+            # Use $reqname and compare with $state to determine score
+            $reqname = $this->_determine_missing_required_questions($reqname, $state);
+            $reqnum_missing = count($reqname);
+
             print '<div class="col-md-3 col-xs-6">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $s .'">' . $s . '</a></div>' .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $s .'">' . $s . 
+                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum - $reqnum_found) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
+                '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'section\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $s . '\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
         }
@@ -899,15 +946,39 @@ class wcsalib {
     }
 
     private function _show_cemeteries($project) {
+        # Get the list of cemeteries in this project
         $clist = $this->_list_dir($this->data . $project);
+
+        if( $clist === false) { 
+            print("You have reached a non-existant location. Perhaps your URL is incorrect or obsolete.");
+            return false;
+        }
+
+        # For completion info - give completion state of each cemetery's survey
+        $survey = $this->_load_json_survey($this->project);
+        $survey = (isset($survey['cemetery']) ? $survey['cemetery'] : array());
+
+        $reqname = $this->_get_scope_required_questions($survey);
+        $reqnum = count($reqname);
 
         print '<div class="row scope_list"><h2 class="col-xs-12 correction">Cemeteries</h2></div>';
 
+        $reqnum_found = 0;
         print '<div class="row scope_list">';
         foreach($clist as $c) {
+
+            # Get the data for this cemetery and see how many of the required fields in the $survey are present the state data
+            $state = $this->_load_scope_state('cemetery', array("project" => $project, "cemetery" => $c) );
+
+            # Use $reqname and compare with $state to determine score
+            $reqname = $this->_determine_missing_required_questions($reqname, $state);
+            $reqnum_missing = count($reqname);
+
             print '<div class="col-md-3 col-xs-6">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c . '</a></div>' .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
+                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum - $reqnum_found) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
+                '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'cemetery\',\'' . $project . '\',\'' . $c . '\',\'\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
         }
@@ -1154,6 +1225,60 @@ class wcsalib {
                 $this->send_error("Deletion of scopes other than 'grave' is not implemented");
 
         }
+    }
+
+    private function _get_scope_required_questions($survey_frag) {
+        $reqname = array();
+
+        # Iterate through and into hierarcy of tabs and groups
+        for( $tabnum = 0; $tabnum < count($survey_frag); $tabnum += 1 ) {
+            $tab = $survey_frag[$tabnum];
+            for( $grpnum = 0; $grpnum < count($tab['contents']); $grpnum += 1 ) {
+                $group = $tab['contents'][$grpnum];
+                # categories are synonymous with questions
+                for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
+                    $cat = $group['contents'][$catnum];
+                    if($cat['required'] === 'true') {
+                        #array_push($reqname, $cat['name']);
+                        $reqname[$cat['name']] = $cat['data_type'];
+                    }
+                }
+            }
+        }
+        return($reqname);
+    }
+
+    private function _determine_missing_required_questions($reqname, $state) {
+
+        foreach( $reqname as $name => $type ) {
+            $found = false;
+            if( array_key_exists($name, $state) ) {
+                switch($type) {
+                case 'set':
+                case 'set_thumbnail':
+                    if( count($state[$name]) > 0 ) { $found = true; }
+                    break;
+                case 'radio':
+                case 'radio_thumbnail':
+                case 'text':
+                case 'measurement':
+                case 'binary':
+                    if( $state[$name] !== '' ) { 
+                        #print "Found " . $state[$name] . '<br>';
+                        $found = true; 
+                    }
+                    break;
+                default:
+                    print "Did not find data type in determine_missing_required_questions().";
+                }
+
+                # Thoroughly check if we have data for the required field
+                if( $found ) {
+                    unset($reqname[$name]);
+                } 
+            } 
+        }
+        return($reqname);
     }
 }
 

@@ -8,8 +8,8 @@ $data = $_POST;
 
 require('wcsa.php');
 
-$wcsa->submit_data($data);
-
-print('{}');
+if( $wcsa->submit_data($data) ) {
+    print '{}';
+}
 
 ?>

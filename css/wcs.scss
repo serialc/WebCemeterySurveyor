@@ -116,7 +116,7 @@ header {
 
 /* ---------------- Buttons, FABs -------------------------------- */
 .fab {
-    position: absolute;
+    position: fixed;
     bottom: 25px;
     right: 25px;
     background-color: $accent-color;
@@ -165,6 +165,9 @@ h2 {
 }
 
 /* ---------------- Misc -------------------------------- */
+.accent {
+    color: $accent-color;
+}
 .col-xs-12 {
     /* bootstrap over-ride, may cause col to collapse... */
     min-height: 0px;

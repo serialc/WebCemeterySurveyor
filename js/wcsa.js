@@ -1312,7 +1312,7 @@ WCSA.toggle_attribute = function(scope, project, cemetery, section, grave, data_
             // update server JSON
             $.ajax({
                 type: "POST",
-                //dataType: "json", // need to respond with valid json response and having trouble with this
+                dataType: "json", // need to respond with valid json response and having trouble with this
                 url: WCSA.base_path + "inc/update_scope_cat.php",
                 data: {"scope": scope,
                     "project": project, 
