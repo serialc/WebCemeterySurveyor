@@ -497,7 +497,7 @@ class wcsalib {
                             }
                             # Add the onclick here
                             # Give attributes dropzone ability if indicated
-                            print '<div class="col-xs-12 col-md-3' . (isset($cat['attrib_camera'] && $cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . '" onclick="' .
+                            print '<div class="col-xs-12 col-md-3' . (isset($cat['attrib_camera']) && $cat['attrib_camera'] === 'true' ? ' dropzone' : '') . '" id="' . $cat['name'] . ':::' . $seti . '"><div id="' . $cat['name'] . '_' . $seti . '" class="col-xs-12 col-md-12 citem ' . $selected . '" onclick="' .
                                 'WCSA.toggle_attribute(\'' . $scope . '\',\'' .
                                                             $identobj['project']  . '\',\'' .
                                                             $identobj['cemetery']  . '\',\'' .
