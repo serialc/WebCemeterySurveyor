@@ -879,7 +879,6 @@ class wcsalib {
 
         print '<div class="row scope_list"><h2 class="col-xs-12 correction">Graves for section ' . $section . '</h2></div>';
 
-        $reqnum_found = 0;
         print '<div class="row scope_list">';
         foreach($glist as $g) {
 
@@ -887,13 +886,13 @@ class wcsalib {
             $state = $this->_load_scope_state('grave', array("project" => $project, "cemetery" => $cemetery, "section" => $section, "grave" => $g) );
 
             # Use $reqname and compare with $state to determine score
-            $reqname = $this->_determine_missing_required_questions($reqname, $state);
-            $reqnum_missing = count($reqname);
+            $reqname_missing = $this->_determine_missing_required_questions($reqname, $state);
+            $reqnum_missing = count($reqname_missing);
 
             print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
                 '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $section . '/graves/' . $g .'">' . $g . 
-                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum_missing) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
+                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . $reqnum_missing . " required question(s) not completed:\n" . implode("\n", array_keys($reqname_missing)) .'"></i>' : '' ) . 
                 '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'grave\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $section . '\',\'' . $g . '\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
@@ -928,7 +927,6 @@ class wcsalib {
 
         print '<div class="row scope_list"><h2 class="col-xs-12 correction">Sections for cemetery ' . $cemetery . '</h2></div>';
 
-        $reqnum_found = 0;
         print '<div class="row scope_list">';
         foreach($slist as $s) {
 
@@ -936,13 +934,13 @@ class wcsalib {
             $state = $this->_load_scope_state('section', array("project" => $project, "cemetery" => $cemetery, "section" => $s) );
 
             # Use $reqname and compare with $state to determine score
-            $reqname = $this->_determine_missing_required_questions($reqname, $state);
-            $reqnum_missing = count($reqname);
+            $reqname_missing = $this->_determine_missing_required_questions($reqname, $state);
+            $reqnum_missing = count($reqname_missing);
 
             print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
                 '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $cemetery . '/sections/' . $s .'">' . $s . 
-                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum - $reqnum_found) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
+                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . $reqnum_missing . " required question(s) not completed:\n" . implode("\n", array_keys($reqname_missing)) .'"></i>' : '' ) . 
                 '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'section\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $s . '\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
@@ -978,7 +976,6 @@ class wcsalib {
 
         print '<div class="row scope_list"><h2 class="col-xs-12 correction">Cemeteries</h2></div>';
 
-        $reqnum_found = 0;
         print '<div class="row scope_list">';
         foreach($clist as $c) {
 
@@ -986,13 +983,13 @@ class wcsalib {
             $state = $this->_load_scope_state('cemetery', array("project" => $project, "cemetery" => $c) );
 
             # Use $reqname and compare with $state to determine score
-            $reqname = $this->_determine_missing_required_questions($reqname, $state);
-            $reqnum_missing = count($reqname);
+            $reqname_missing = $this->_determine_missing_required_questions($reqname, $state);
+            $reqnum_missing = count($reqname_missing);
 
             print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
                 '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
-                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . ($reqnum - $reqnum_found) . " required question(s) not completed:\n" . implode("\n", array_keys($reqname)) .'"></i>' : '' ) . 
+                ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . $reqnum_missing . " required question(s) not completed:\n" . implode("\n", array_keys($reqname_missing)) .'"></i>' : '' ) . 
                 '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'cemetery\',\'' . $project . '\',\'' . $c . '\',\'\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
                 '</div></div>';
