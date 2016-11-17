@@ -907,7 +907,7 @@ class wcsalib {
         print $this->_build_scope_survey('section', array( "project" => $project, "cemetery" => $cemetery, "section" => $section) );
 
         # build hidden pictures 
-        print $this->_build_scope_pictures('cemetery', $project, $cemetery, $section, '');
+        print $this->_build_scope_pictures('section', $project, $cemetery, $section, '');
     }
 
     private function _show_cemetery_contents($project, $cemetery) {
