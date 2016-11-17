@@ -1357,8 +1357,11 @@ class wcsalib {
         # Save data
         $save_name = $project . '_' . date('Y-m-d_H-i-s');
         $save_path = $this->export_dir . $save_name . '/';
+        $save_photo_path = $save_path . 'photographs/';
+        
         # create target save folder, shouldn't exist as the filename uses the date and time
         mkdir($save_path);
+        mkdir($save_photo_path);
 
         $delim = "\t";
         $nl = "\n";
@@ -1398,6 +1401,7 @@ class wcsalib {
             if( isset( $cstate['photographs'] ) ) {
                 foreach( $cstate['photographs'] as $fn => $assoc ) {
                     $cphoto .= $c . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
+                    copy($this->data . $project . '/' . $c . '/photographs/' . $fn, $save_photo_path . $fn);
                 }
             }
 
@@ -1426,6 +1430,7 @@ class wcsalib {
                 if( isset( $sstate['photographs'] ) ) {
                     foreach( $sstate['photographs'] as $fn => $assoc ) {
                         $sphoto .= $c . '_' . $s . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
+                        copy($this->data . $project . '/' . $c . '/' . $s . '/photographs/' . $fn, $save_photo_path . $fn);
                     }
                 }
 
@@ -1454,6 +1459,7 @@ class wcsalib {
                     if( isset( $gstate['photographs'] ) ) {
                         foreach( $gstate['photographs'] as $fn => $assoc ) {
                             $gphoto .= $c . '_' . $s . '_' . $g . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
+                            copy($this->data . $project . '/' . $c . '/' . $s . '/' . $g . '/photographs/' . $fn, $save_photo_path . $fn);
                         }
                     }
                 }
@@ -1464,7 +1470,6 @@ class wcsalib {
         $cdata = trim($cdata, $nl);
         $sdata = trim($sdata, $nl);
         $gdata = trim($gdata, $nl);
-
 
         # data
         file_put_contents($save_path . 'cemetery_data.txt', $cdata);
@@ -1481,13 +1486,10 @@ class wcsalib {
         $zip = new ZipArchive;
         $new_save_path = $save_name . '.zip';
         if ($zip->open($new_save_path, ZIPARCHIVE::CREATE) === TRUE) {
-            $zip->addFile($save_name . '/' . 'cemetery_data.txt');
-            $zip->addFile($save_name . '/' . 'section_data.txt');
-            $zip->addFile($save_name . '/' . 'grave_data.txt');
-
-            $zip->addFile($save_name . '/' . 'cemetery_photos.txt');
-            $zip->addFile($save_name . '/' . 'section_photos.txt');
-            $zip->addFile($save_name . '/' . 'grave_photos.txt');
+            # Add all the files in the folder $save_name
+            foreach($this->_list_files($save_name) as $txtfile) {
+                $zip->addFile($save_name . '/' . $txtfile);
+            }
 
             $zip->close();
         }
@@ -1495,10 +1497,12 @@ class wcsalib {
         # Provide download link
         header("Content-type: application/zip"); 
         header("Content-Disposition: attachment; filename=$new_save_path");
-        #header("Content-length: " . filesize($archive_file_name));
+        header("Content-length: " . filesize($archive_file_name));
         header("Pragma: no-cache"); 
         header("Expires: 0"); 
         readfile("$new_save_path");
+
+        unlink($new_save_path);
     }
 }
 
