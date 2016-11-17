@@ -8,6 +8,8 @@ $new_data = $_POST;
 
 require('wcsa.php');
 
-$wcsa->update_json($new_data);
+if($wcsa->update_json($new_data)) {
+    print '{}';
+}
 
 ?>

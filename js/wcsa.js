@@ -520,7 +520,7 @@ WCSA.error = function(msg) {
 
     wc.innerHTML = msg;
     wb.style.display = 'block';
-    setTimeout(function() {$('#error_header').fadeOut('slow')}, 5000);
+    setTimeout(function() {$('#error_header').fadeOut('slow')}, 10000);
 
     // Need to make this show up for the user
     console.log(msg)
@@ -528,6 +528,13 @@ WCSA.error = function(msg) {
 };
 
 WCSA.warn = function(msg) {
+    var wb = document.getElementById('warn_header'),
+        wc = document.getElementById('warn_header_content');
+
+    wc.innerHTML = msg;
+    wb.style.display = 'block';
+    setTimeout(function() {$('#warn_header').fadeOut('slow')}, 10000);
+
     console.log(msg)
 }
 
@@ -1033,7 +1040,7 @@ WCSA.new_survey_item = function(event, uid) {
                         });
                         break;
 
-                    case 'measurment':
+                    case 'measurement':
                         WCSA.survey[scope][tindex]['contents'][gindex]['contents'].push({
                             "_type": "category",
                             "data_type": "measurement",
@@ -1093,14 +1100,14 @@ WCSA.update_full_json_survey = function() {
 
     $.ajax({
         type: "POST",
-        //dataType: "json", // need to respond with valid json response and having trouble with this
+        dataType: "json",
         url: WCSA.base_path + "inc/update_json.php",
         data: {"project": WCSA.get_projectname(), "survey": WCSA.survey}
     })
-    .done(function(e) {
-    })
+    .done(function(e) { })
     .fail(function(e) {
-        WCSA.error("Unable to update data on server.");
+        WCSA.warn("The server complained with this data update: <br>" + e.responseText);
+        console.log(e);
     });
 };
 
@@ -1137,6 +1144,7 @@ WCSA.delete_survey_item = function(event, uid) {
             WCSA.survey_toggle_stgq_view(null, scope, 'sscope');
             WCSA.survey_toggle_stgq_view(null, scope, 'sscope');
 
+            WCSA.update_full_json_survey();
             break;
 
         // Delete a group
@@ -1165,6 +1173,7 @@ WCSA.delete_survey_item = function(event, uid) {
             WCSA.survey_toggle_stgq_view(null, scope + '_' + tindex, 'stab');
             WCSA.survey_toggle_stgq_view(null, scope + '_' + tindex, 'stab');
 
+            WCSA.update_full_json_survey();
             break;
 
         // Delete a question
@@ -1205,10 +1214,7 @@ WCSA.delete_survey_item = function(event, uid) {
 
         default:
             WCSA.error("Unexpected request in delete_survey_item()");
-
     }
-
-    WCSA.update_full_json_survey();
 };
 
 WCSA.show_scope_survey = function(scope) {
@@ -1238,7 +1244,7 @@ WCSA.submit_input = function(elem, scope, project, cemetery, section, grave, dat
 
     $.ajax({
         type: "POST",
-        dataType: "json", // need to respond with valid json response and having trouble with this
+        dataType: "json", // need to respond with valid json response 
         url: WCSA.base_path + "inc/update_scope_cat.php",
         data: {"scope": scope,
             "project": project, 
@@ -1279,7 +1285,7 @@ WCSA.toggle_attribute = function(scope, project, cemetery, section, grave, data_
             // update server JSON
             $.ajax({
                 type: "POST",
-                //dataType: "json", // need to respond with valid json response and having trouble with this
+                dataType: "json", // need to respond with valid 
                 url: WCSA.base_path + "inc/update_scope_cat.php",
                 data: {"scope": scope,
                     "project": project, 
@@ -1312,7 +1318,7 @@ WCSA.toggle_attribute = function(scope, project, cemetery, section, grave, data_
             // update server JSON
             $.ajax({
                 type: "POST",
-                dataType: "json", // need to respond with valid json response and having trouble with this
+                dataType: "json", // need to respond with valid json 
                 url: WCSA.base_path + "inc/update_scope_cat.php",
                 data: {"scope": scope,
                     "project": project, 
@@ -1347,6 +1353,7 @@ WCSA.toggle_camera = function() {
     var target,
         elems,
         htmls = '',
+        photo_fp,
         counter,
         i;
         
@@ -1367,26 +1374,56 @@ WCSA.toggle_camera = function() {
             // Show the available images in the carrousel
             target = document.getElementById('picture_carousel');
             for(i = 0; i < data.length; i += 1) {
-                htmls += '<img id="' + data[i] + '" src="' + WCSA.base_path + 'photographs/' + data[i] + '" width="100" height="100" draggable="true">';
+                photo_fp = WCSA.base_path + 'photographs/' + data[i];
+                htmls += '<img id="' + data[i] + '" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" width="100" height="100" draggable="true">';
             }
             target.innerHTML = htmls;
 
             function prep_drop_targets() {
                 // Prepare all the drag and drop functionality for the targets
                 var idp,
-                    i,
+                    j,
+                    k,
                     target,
                     lasttarget,
                     data,
                     thumbnail,
+                    DDenter, DDover, DDdrop, DDleave,
                     targets = document.getElementsByClassName('dropzone');
 
-                // Make all potential targets highlighted
-                for(i = 0; i < targets.length; i += 1) {
-                    targets[i].classList.add('active_dz')
+                    // DRAGENTER
+                    DDenter = function( event ) {
+                        counter += 1;
+                        this.style.borderColor = 'green';
+                        this.style.borderStyle = 'solid';
+
+                        // Bubble up to get the id of the dragzone element
+                        target = event.target;
+                        for( k = 0; k < 3; k += 1 ) {
+                            if( !target.classList || !target.classList.contains('dropzone') ) {
+                                // overwrite with parent
+                                target = target.parentNode;
+                                continue;
+                            }
+                            // found it
+                            break;
+                        }
+
+                        // See if this is the dropzone as the last, reset the last one if not
+                        if( lasttarget !== target && lasttarget !== undefined ) {
+                            lasttarget.style.borderColor = '';
+                            lasttarget.style.borderStyle = '';
+                        }
+                        lasttarget = target;
+                    };
+                    
+                    // DRAGOVER
+                    DDover = function( event ) {
+                        event.preventDefault();
+                    }
 
                     // DROP
-                    targets[i].addEventListener('drop', function( event ) {
+                    DDdrop = function( event ) {
                         // prevent URL follow
                         event.preventDefault();
 
@@ -1394,11 +1431,15 @@ WCSA.toggle_camera = function() {
 
                         // Bubble up to get the id of the dragzone element
                         target = event.target;
-                        for( i = 0; i < 3; i += 1 ) {
+                        for( k = 0; k < 3; k += 1 ) {
+                            // Shouldn't be any farther than 2 jumps...
                             if( !target.classList || !target.classList.contains('dropzone') ) {
                                 // overwrite with parent
                                 target = target.parentNode;
+                                continue;
                             }
+                            // found it
+                            break;
                         }
 
                         // remove highlights
@@ -1409,9 +1450,9 @@ WCSA.toggle_camera = function() {
                         // Also add data to this scopes data file with the file name and associated NAME and, possible ATTRIBUTE
                         idp = target.id.split(':::');
                         if( idp.length === 2 ) {
-                            data = {"picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0], "attribute": idp[1]};
+                            data = {"action": "associate", "picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0], "attribute": idp[1]};
                         } else {
-                            data = {"picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0]};
+                            data = {"action": "associate", "picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0]};
                         }
 
                         $.ajax({
@@ -1427,56 +1468,40 @@ WCSA.toggle_camera = function() {
                             thumbnail.parentNode.removeChild(thumbnail);
                         })
                         .fail(function(e) {
-                            WCSA.error("Unable to move photograph to associate it with this feature: " + e);     
+                            WCSA.error("Unable to move photograph to associate it with this feature: " + e.responseText);     
                         })
-                    }, false);
+                    };
 
-                    // DRAGOVER
-                    // important, otherwise 'drop' does not get called
-                    targets[i].addEventListener('dragover', function( event ) {
-                        event.preventDefault();
-                    }, false);
-
-                    // DRAGENTER
-                    targets[i].addEventListener('dragenter', function( event ) {
-                        counter += 1;
-                        this.style.borderColor = 'green';
-                        this.style.borderStyle = 'solid';
-
-                        // Bubble up to get the id of the dragzone element
-                        target = event.target;
-                        for( i = 0; i < 3; i += 1 ) {
-                            if( !target.classList || !target.classList.contains('dropzone') ) {
-                                // overwrite with parent
-                                target = target.parentNode;
-                            }
-                        }
-
-                        // See if this is the dropzone as the last, reset the last one if not
-                        if( lasttarget !== target && lasttarget !== undefined ) {
-                            lasttarget.style.borderColor = '';
-                            lasttarget.style.borderStyle = '';
-                        }
-                        lasttarget = target;
-                    }, false);
-                    
                     // DRAGLEAVE
-                    targets[i].addEventListener('dragleave', function( event ) {
+                    DDleave = function( event ) {
                         counter -= 1;
                         if( counter === 0 ) {
                             this.style.borderColor = '';
                             this.style.borderStyle = '';
                         }
-                    }, false);
+                    };
+
+                // Make all potential targets highlighted
+                for(j = 0; j < targets.length; j += 1) {
+                    targets[j].classList.add('active_dz')
+
+                    targets[j].addEventListener('dragenter',  DDenter, false);
+                    targets[j].addEventListener('dragover',  DDover, false); // important, otherwise 'drop' will not be called/captured
+                    targets[j].addEventListener('drop',  DDdrop, false);
+                    targets[j].addEventListener('dragleave',  DDleave, false);
                 }
 
-                // Listen for global 'drop' to undo highlights
+                // Listen for global 'drop' to undo highlights and removeEventListeners!
                 document.addEventListener('drop', function(event) {
                     // prevent URL follow
                     event.preventDefault();
                     // hide highlights for all possible targets
-                    for(i = 0; i < targets.length; i += 1) {
-                        targets[i].classList.remove('active_dz');
+                    for(j = 0; j < targets.length; j += 1) {
+                        targets[j].classList.remove('active_dz')
+                        targets[j].removeEventListener('dragenter',  DDenter, false);
+                        targets[j].removeEventListener('dragover',  DDover, false);
+                        targets[j].removeEventListener('drop',  DDdrop, false);
+                        targets[j].removeEventListener('dragleave',  DDleave, false);
                     }
                     // need to reset counter as we possible dropped inside a cell (counter !== 0)
                     counter = 0;
@@ -1506,9 +1531,31 @@ WCSA.toggle_camera = function() {
     }
 };
 
+WCSA.unlink_photograph = function(filename) {
+    var elem;
+
+    $.ajax({
+        type: "POST",
+        url: WCSA.base_path + "inc/associate_photo.php",
+        dataType: "json",
+        data:  {"action": "unlink", "picture": filename, "id": WCSA.id}
+    })
+    .done(function(e) {
+        // On successful move
+        // Remove picture from picture_carousel
+        elem = document.getElementById(filename);
+        elem.parentNode.removeChild(elem);
+    })
+    .fail(function(e) {
+        WCSA.error("Unable to unlink this photograph: " + e.responseText);     
+        console.log(e);
+    });
+};
+
 WCSA.show_scope_pictures = function() {
     var picont,
         pic,
+        photo_fp,
         htmls;
 
     // Display and hide content appropriately
@@ -1534,14 +1581,16 @@ WCSA.show_scope_pictures = function() {
         } else {
             htmls = '';
             for(pic in data) {
-                htmls += '<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12"><div class="col-xs-12 col-xs-center">';
-                htmls += '<img class="thumbnail" src="' + WCSA.base_path + 'data/' + WCSA.id.project +
-                    '/' + WCSA.id.cemetery + 
-                    (WCSA.id.section ? '/' + WCSA.id.section : '') + 
+                photo_fp = WCSA.base_path + 'data/' + WCSA.id.project +'/' + WCSA.id.cemetery +
+                    (WCSA.id.section ? '/' + WCSA.id.section : '') +
                     (WCSA.id.grave ? '/' + WCSA.id.grave : '') + 
-                    '/photographs/' + pic + '">';
-                htmls += '<div class="photo_info">' + data[pic].name + (data[pic].attribute ? ':<br>' + data[pic].attribute : '') + '</div>';
-                htmls += '</div></div>';
+                    '/photographs/' + pic;
+
+                htmls += '<div id="' + pic + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12"><div class="row"><div class="col-xs-12 text-xs-center">';
+                htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + pic + '\')" src="' + photo_fp + '">';
+                htmls += '<div class="photo_info">' + data[pic].name + (data[pic].attribute ? ': ' + data[pic].attribute : '') + '</div>';
+                htmls += '<button type="button" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + pic + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
+                htmls += '</div></div></div>';
             }
             picont.innerHTML = htmls;
         }
@@ -1549,6 +1598,14 @@ WCSA.show_scope_pictures = function() {
     .fail(function(e) {
         WCSA.error("Could not retrieve photographs list: " + e);
     })
+};
+
+WCSA.show_photo = function(photo_path, name) {
+    $('.modal-title', '#main_modal').html('<h2>' + name + '</h2>');
+    $('.modal-body', '#main_modal').html('<img src="' + photo_path + '" width="100%">');
+    $('.btn-primary', '#main_modal').hide();
+    // Show the modal
+    $('#main_modal').modal('toggle');
 };
 
 WCSA.bookmark = function() {
@@ -1599,7 +1656,7 @@ WCSA.delete_scope = function(scope) {
         // delete from server
         $.ajax({
             type: "POST",
-            dataType: "json", // need to respond with valid json response and having trouble with this
+            dataType: "json", // need to respond with valid json 
             url: WCSA.base_path + "inc/delete_scope.php",
             data: {"scope": scope,
                 "id": WCSA.id

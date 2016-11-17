@@ -73,13 +73,17 @@ header {
         color: $primary-color-light;
     }
 }
-#error_header {
+#error_header, #warn_header {
     display: none;
     background-color: #c9302c;
     color: white;
     width: 100%;
     z-index: 2000;
     opacity: 0.8;
+}
+#warn_header {
+    background-color: orange;
+    color: black;
 }
 
 .nav-main-title {
@@ -173,11 +177,14 @@ h2 {
     min-height: 0px;
 }
 .photo_info {
-    position: absolute;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 4px;
-    top: 0;
+}
+.photo_rem {
+    position: absolute;
+    top: 2px;
+    right: 17px;
 }
 
 .x {

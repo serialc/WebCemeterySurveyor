@@ -6,11 +6,13 @@ PHP_OS == "Windows" || PHP_OS == "WINNT" ? define("SEPARATOR", "\\") : define("S
 class wcsalib {
 
     # define private variables here
-    private $data;
+    private $data = 'data/';
     public $basepath;
     public $project;
     private $jdata = false;
-    private $photo_dir;
+    private $photo_dir = 'photographs/';
+    private $thumbnails = 'thumbnails/';
+    private $export_dir = 'export/';
 
     # constructor
     public function __construct() {
@@ -22,21 +24,10 @@ class wcsalib {
             chdir('..');
         }
 
-        # Check data dir exists and create it if not
-        $this->data = 'data/';
-        if (!file_exists($this->data)) {
-            mkdir($this->data);
-        } 
-
-        # Check that general thumbnails dir exists and create it if not
-        if (!file_exists('thumbnails/')) {
-            mkdir('thumbnails/');
-        } 
-        # Check that general photo dir exists and create it if not
-        $this->photo_dir = 'photographs/';
-        if (!file_exists($this->photo_dir)) {
-            mkdir($this->photo_dir);
-        } 
+        # Check that a few general purpose directories exist, create them it if not
+        foreach(array($this->thumbnails, $this->photo_dir, $this->data, $this->export_dir) as $fcheck) {
+            if (!file_exists($fcheck)) { mkdir($fcheck); } 
+        }
 
         # Get URL base path
         $url = 'http://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
@@ -212,12 +203,13 @@ class wcsalib {
         }
     }
 
-    private function _load_json_survey($name, $get_format='php') {
+    private function _load_json_survey($project, $get_format='php') {
+
         if($this->jdata === false) {
-            $filepath = $this->data . $name;
+            $filepath = $this->data . $project;
             if (file_exists($filepath)) {
                 # get raw file
-                $this->raw = file_get_contents($filepath . '/' . $name . '.json');
+                $this->raw = file_get_contents($filepath . '/' . $project . '.json');
                 # convert JSON to PHP assoc. array
                 $this->jdata = json_decode($this->raw, true);
                 # Check if it is not valid
@@ -247,6 +239,21 @@ class wcsalib {
         $survey = $passed['survey'];
 
         $this->_save_json_survey($project, $survey);
+
+        $all_names = $this->_get_existing_survey_category_names($project);
+        $uniq_names = array_unique($all_names);
+
+        if( count($all_names) === count($uniq_names) ) {
+            return true;
+        }
+
+        # We have a problem - duplicate names
+        print 'Duplicate question/category names detected!<br>There are multiple instances of the names:<br>';
+        foreach( array_count_values($all_names) as $name => $freq ) {
+            if( $freq > 1 ) {
+                print $name . '<br>';
+            }
+        }
     }
 
     private function _save_json_survey($name, $data) {
@@ -518,13 +525,13 @@ class wcsalib {
                         print '<div class="row">';
 
                         # Give warning if no pictures were found
-                        if( !file_exists('thumbnails/' . $cat['attributes']) ) {
+                        if( !file_exists($this->thumbnails . $cat['attributes']) ) {
                             print 'Did not find any thumbnail images in the folder \'' . $cat['attributes'] . '\'.';
                             print '</div>'; # Close category/question div
                             continue;
                         }
                         # Get the list of files in the directory
-                        $thumbs = $this->_list_files('thumbnails/' . $cat['attributes'] . '/');
+                        $thumbs = $this->_list_files($this->thumbnails . $cat['attributes'] . '/');
                         foreach( $thumbs as $tn ) {
                             # check if data exists for this
                             $selected = '';
@@ -541,7 +548,7 @@ class wcsalib {
                                                             'set_thumbnail\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $tn . '\')' .
-                                '"><img class="thumbnail" src="' . $this->basepath . 'thumbnails/' . $cat['attributes'] . '/' . $tn . '">' . '</div></div>';
+                                '"><img class="thumbnail" src="' . $this->basepath . $this->thumbnails . $cat['attributes'] . '/' . $tn . '">' . '</div></div>';
                         }
                         #print(nl2br(print_r($cat, true)));
                         print '</div>';
@@ -570,7 +577,7 @@ class wcsalib {
                                                             $cat['name'] . '\',\'' . 
                                                             $seti . '\');' .
 
-                                (isset($cat['dependency']) ? 'WCSA.toggle_dependency_visibility(\'' . $cat['name'] . '_' . $cat['dependency'] . '\',' . $catnum . ',' . $cat['dependency_num'] . ')' : '') . 
+                                (isset($cat['dependency']) && $cat['dependency'] !== '' ? 'WCSA.toggle_dependency_visibility(\'' . $cat['name'] . '_' . $cat['dependency'] . '\',' . $catnum . ',' . $cat['dependency_num'] . ')' : '') . 
 
                                 '">' . $seti . '</div></div>';
 
@@ -589,13 +596,13 @@ class wcsalib {
                         print '<div class="row">';
 
                         # Give warning if no pictures were found
-                        if( !file_exists('thumbnails/' . $cat['attributes']) ) {
+                        if( !file_exists($this->thumbnails . $cat['attributes']) ) {
                             print 'Did not find any thumbnail images in the folder \'' . $cat['attributes'] . '\'.';
                             print '</div>'; # Close category/question div
                             continue;
                         }
                         # Get the list of files in the directory
-                        $thumbs = $this->_list_files('thumbnails/' . $cat['attributes']);
+                        $thumbs = $this->_list_files($this->thumbnails . $cat['attributes']);
                         foreach( $thumbs as $tn ) {
                             # check if data exists for this
                             $selected = '';
@@ -612,7 +619,7 @@ class wcsalib {
                                                             'radio_thumbnail\',\'' . 
                                                             $cat['name'] . '\',\'' . 
                                                             $tn . '\')' .
-                                '"><img class="thumbnail" src="' . $this->basepath . 'thumbnails/' . $cat['attributes'] . '/' . $tn . '">' . '</div></div>';
+                                '"><img class="thumbnail" src="' . $this->basepath . $this->thumbnails . $cat['attributes'] . '/' . $tn . '">' . '</div></div>';
                         }
                         #print(nl2br(print_r($cat, true)));
                         print '</div>';
@@ -1093,6 +1100,38 @@ class wcsalib {
         }
         return($htmls);
     }
+    public function disassociate_photo($data) {
+        # we want to update the json data for this scope item
+        $state = $this->_load_scope_state($data['id']['scope'], $data['id']);
+        # remove this photograph
+        unset($state['photographs'][$data['picture']]);
+        # Save the update state data
+        $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
+
+        # Move the photo
+        switch($data['id']['scope']) {
+        case 'cemetery':
+            # Move the photograph
+            rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            break;
+
+        case 'section':
+            # Move the photograph
+            rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            break;
+
+        case 'grave':
+            # Move the photograph
+            rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/' . $data['id']['grave'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            break;
+
+        default:
+            $this->send_error("Unable to find proper scope to relocate photograph.");
+            return false;
+        }
+        return true;
+    }
+
     public function associate_photo($data) {
 
         # we want to update the json data for this scope item
@@ -1287,6 +1326,182 @@ class wcsalib {
             } 
         }
         return($reqname);
+    }
+    private function _get_existing_survey_category_names($project, $byscope=false) {
+        # Get the survey structure to see the order of the files
+        $snoa = array(); # Survey Name Order Array
+        $survey = $this->_load_json_survey($project);
+        # Iterate through and into hierarcy of tabs and groups
+        foreach( array('cemetery', 'section', 'grave') as $scope) {
+            if($byscope) { $snoa[$scope] = array(); };
+            $survey_frag = $survey[$scope];
+            for( $tabnum = 0; $tabnum < count($survey_frag); $tabnum += 1 ) {
+                $tab = $survey_frag[$tabnum];
+                for( $grpnum = 0; $grpnum < count($tab['contents']); $grpnum += 1 ) {
+                    $group = $tab['contents'][$grpnum];
+                    # categories are synonymous with questions
+                    for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
+                        $cat = $group['contents'][$catnum];
+                        if($byscope) {
+                            array_push($snoa[$scope], $cat['name']);
+                        } else {
+                            array_push($snoa, $cat['name']);
+                        }
+                    }
+                }
+            }
+        }
+        return $snoa;
+    }
+
+    public function export($project) {
+        $names = $this->_get_existing_survey_category_names($project, true);
+
+        # Save data
+        $save_name = $project . '_' . date('Y-m-d_H-i-s');
+        $save_path = $this->export_dir . $save_name . '/';
+        # create target save folder, shouldn't exist as the filename uses the date and time
+        mkdir($save_path);
+
+        $delim = "\t";
+        $nl = "\n";
+        
+        # Strings to build up data within
+        $cdata = 'cid' . $delim . 'cemetery_name' . $delim . implode($delim, $names['cemetery']) . $nl;
+        $sdata = 'sid' . $delim . 'cemetery_name' . $delim . 'section_name' . $delim . implode($delim, $names['section']) . $nl;
+        $gdata = 'gid' . $delim . 'cemetery_name' . $delim . 'section_name' . $delim . 'grave_name' . $delim . implode($delim, $names['grave']) . $nl;
+
+        # Photographs data
+        $cphoto = 'cid' . $delim . 'name' . $delim . 'cat_assoc' . $delim . 'attrib_assoc' . $nl;
+        $sphoto = 'sid' . $delim . 'name' . $delim . 'cat_assoc' . $delim . 'attrib_assoc' . $nl;
+        $gphoto = 'gid' . $delim . 'name' . $delim . 'cat_assoc' . $delim . 'attrib_assoc' . $nl;
+
+        # get the names of each cemetery
+        $clist = $this->_list_dir($this->data . $project);
+        foreach($clist as $c) {
+            # this cemetery's data
+            $cstate = $this->_load_scope_state('cemetery', array("project" => $project, "cemetery" => $c) );
+
+            # Data
+            $cdata .= $c . $delim; # cid
+            $cdata .= $c . $delim; # cemetery
+            foreach( $names['cemetery'] as $cname ) {
+                if( isset( $cstate[$cname] ) ) {
+                    if( is_array($cstate[$cname]) ) {
+                        $cdata .= implode(',', $cstate[$cname]);
+                    } else {
+                        $cdata .= $cstate[$cname];
+                    }
+                }
+                $cdata .= $delim;
+            }
+            $cdata = trim($cdata, $delim) . $nl;
+
+            # Photographs
+            if( isset( $cstate['photographs'] ) ) {
+                foreach( $cstate['photographs'] as $fn => $assoc ) {
+                    $cphoto .= $c . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
+                }
+            }
+
+            # sections in this cemetery
+            $slist = $this->_list_dir($this->data . $project . '/' . $c);
+            foreach($slist as $s) {
+                # this section's data
+                $sstate = $this->_load_scope_state('section', array("project" => $project, "cemetery" => $c, "section" => $s) );
+
+                # Data
+                $sdata .= $c . '_' . $s . $delim; # sid
+                $sdata .= $c . $delim . $s . $delim; # cemetery, section
+                foreach( $names['section'] as $sname ) {
+                    if( isset( $sstate[$sname] ) ) {
+                        if( is_array($sstate[$sname]) ) {
+                            $sdata .= implode(',', $sstate[$sname]);
+                        } else {
+                            $sdata .= $sstate[$sname];
+                        }
+                    }
+                    $sdata .= $delim;
+                }
+                $sdata = trim($sdata, $delim) . $nl;
+
+                # Photographs
+                if( isset( $sstate['photographs'] ) ) {
+                    foreach( $sstate['photographs'] as $fn => $assoc ) {
+                        $sphoto .= $c . '_' . $s . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
+                    }
+                }
+
+                # graves in this section
+                $glist = $this->_list_dir($this->data . $project . '/' . $c . '/' . $s);
+                foreach($glist as $g) {
+                    # this grave's data
+                    $gstate = $this->_load_scope_state('grave', array("project" => $project, "cemetery" => $c, "section" => $s, "grave" => $g) );
+
+                    # Data
+                    $gdata .= $c . '_' . $s . '_' . $g . $delim; # gid
+                    $gdata .= $c . $delim . $s . $delim . $g . $delim; # cem, sec, grave
+                    foreach( $names['grave'] as $gname ) {
+                        if( isset( $gstate[$gname] ) ) {
+                            if( is_array($gstate[$gname]) ) {
+                                $gdata .= implode(',', $gstate[$gname]);
+                            } else {
+                                $gdata .= $gstate[$gname];
+                            }
+                        }
+                        $gdata .= $delim;
+                    }
+                    $gdata = trim($gdata, $delim) . $nl;
+
+                    # Photographs
+                    if( isset( $gstate['photographs'] ) ) {
+                        foreach( $gstate['photographs'] as $fn => $assoc ) {
+                            $gphoto .= $c . '_' . $s . '_' . $g . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
+                        }
+                    }
+                }
+            }
+        }
+
+        # Trim off the trailing new lines
+        $cdata = trim($cdata, $nl);
+        $sdata = trim($sdata, $nl);
+        $gdata = trim($gdata, $nl);
+
+
+        # data
+        file_put_contents($save_path . 'cemetery_data.txt', $cdata);
+        file_put_contents($save_path . 'section_data.txt', $sdata);
+        file_put_contents($save_path . 'grave_data.txt', $gdata);
+        
+        # photographs
+        file_put_contents($save_path . 'cemetery_photos.txt', $cphoto);
+        file_put_contents($save_path . 'section_photos.txt', $sphoto);
+        file_put_contents($save_path . 'grave_photos.txt', $gphoto);
+        
+        # Zip it all
+        chdir($this->export_dir);
+        $zip = new ZipArchive;
+        $new_save_path = $save_name . '.zip';
+        if ($zip->open($new_save_path, ZIPARCHIVE::CREATE) === TRUE) {
+            $zip->addFile($save_name . '/' . 'cemetery_data.txt');
+            $zip->addFile($save_name . '/' . 'section_data.txt');
+            $zip->addFile($save_name . '/' . 'grave_data.txt');
+
+            $zip->addFile($save_name . '/' . 'cemetery_photos.txt');
+            $zip->addFile($save_name . '/' . 'section_photos.txt');
+            $zip->addFile($save_name . '/' . 'grave_photos.txt');
+
+            $zip->close();
+        }
+
+        # Provide download link
+        header("Content-type: application/zip"); 
+        header("Content-Disposition: attachment; filename=$new_save_path");
+        #header("Content-length: " . filesize($archive_file_name));
+        header("Pragma: no-cache"); 
+        header("Expires: 0"); 
+        readfile("$new_save_path");
     }
 }
 
