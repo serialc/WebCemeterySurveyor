@@ -430,10 +430,12 @@ class wcsalib {
         # if there are more than 1 tabs, build the tab system
         if( count($survey) > 1 ) {
             # Build tabs at top of page
-            print '<div class="row scope_survey" style="' . ($scope === 'grave' ? 'display:        block':'') . '">';
+            # We ony display these next two elements by default for the grave as it is directly visible on arrival
+            print '<div id="ttitlespacer" class="scope_survey" style="' . ($scope === 'grave' ? 'display: block':'') . '"></div>';
+            print '<div id="ttitleheader" class="row scope_survey navbar-fixed-top" style="' . ($scope === 'grave' ? 'display: block':'') . '">';
             for( $tabnum = 0; $tabnum < count($survey); $tabnum += 1 ) {
                 $tabcolw = round(12/count($survey));
-                print '<div class="col-md-' . $tabcolw . ' col-xs-12 upper ttitle' . ($tabnum === 0 ? ' selected' : '') . '" onclick="WCSA.show_tab_section(this, \'tab_' . $tabnum . '\')">';
+                print '<div class="col-xs-' . $tabcolw . ' upper ttitle' . ($tabnum === 0 ? ' selected' : '') . '" onclick="WCSA.show_tab_section(this, \'tab_' . $tabnum . '\')">';
                 print $survey[$tabnum]['title'];
                 print '</div>';
             }
@@ -898,7 +900,8 @@ class wcsalib {
                 '</div></div>';
         }
         # Show FAB (floating action button)
-        print('<div class="fab" onclick="WCSA.new_scope_item(\'grave\',\'' . $project . '\',\'' . $cemetery . '\',\'' . $section . '\')"><i class="fa fa-plus" aria-hidden="true"></i></div>');
+        $next_avail_id = $this->_get_next_available_grave_integer($project, $cemetery, $section);
+        print('<div class="fab" onclick="WCSA.new_grave(\'' . $project . '\',\'' . $cemetery . '\',\'' . $section . '\',' . $next_avail_id . ')"><i class="fa fa-plus" aria-hidden="true"></i></div>');
 
         # End of list view items
         print '</div>';
@@ -908,6 +911,16 @@ class wcsalib {
 
         # build hidden pictures 
         print $this->_build_scope_pictures('section', $project, $cemetery, $section, '');
+    }
+
+    # Returns the next available integer/id for a grave
+    private function _get_next_available_grave_integer($project, $cemetery, $section) {
+        $glist = $this->_list_dir($this->data . $project . '/' . $cemetery . '/' . $section);
+        $availid = 1;
+        while(in_array((string)$availid, $glist) ) {
+            $availid += 1;
+        }
+        return $availid;
     }
 
     private function _show_cemetery_contents($project, $cemetery) {
@@ -1036,7 +1049,18 @@ class wcsalib {
                 array_push($dirs, $flist[$i]);
             }
         }
-        return($dirs);
+
+        # Sort them so as to separate text and numbers
+        foreach ($dirs as $key => $value) {
+            if (ctype_digit($value)) {
+                $dirs[$key] = intval($value);
+            }
+        }
+        # sort based on the two types
+        sort($dirs);
+
+        # simply return the values, not the indices
+        return(array_values($dirs));
     }
 
     # only list files, not dirs

@@ -79,6 +79,21 @@ WCSA.new_scope_item = function(scope, project, cemetery, section) {
     $('#main_modal').modal('toggle');
 };
 
+WCSA.new_grave = function(project, cemetery, section, id) {
+    $.ajax({
+        type: "POST",
+        url: WCSA.base_path + "inc/new.php",
+        data: {"type": 'new_scope_item', "scope": 'grave', "project": project, "cemetery": cemetery, "section": section, "grave": id}
+    })
+    .done(function() {
+        location.reload();
+    })
+    .fail(function(e) {
+        WCSA.error('Unable to submit due to ' + e);
+        console.log(e)
+    });
+};
+
 WCSA.new_survey = function() {
     $('.modal-title', '#main_modal').html('<h2>Create a new survey project</h2>');
     $('.modal-body', '#main_modal').html(
@@ -1589,7 +1604,7 @@ WCSA.show_scope_pictures = function() {
                 htmls += '<div id="' + pic + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12"><div class="row"><div class="col-xs-12 text-xs-center">';
                 htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + pic + '\')" src="' + photo_fp + '">';
                 htmls += '<div class="photo_info">' + data[pic].name + (data[pic].attribute ? ': ' + data[pic].attribute : '') + '</div>';
-                htmls += '<button type="button" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + pic + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
+                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + pic + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
                 htmls += '</div></div></div>';
             }
             picont.innerHTML = htmls;

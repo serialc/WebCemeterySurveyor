@@ -231,6 +231,12 @@ h2 {
   margin: 15px -15px; }
 
 /* ---------------- Survey -------------------------------- */
+#ttitlespacer {
+  height: 67px; }
+
+#ttitleheader {
+  top: 87px; }
+
 .ttitle {
   margin-top: -15px;
   margin-bottom: 15px;
@@ -239,7 +245,8 @@ h2 {
   color: #FFFFFF;
   padding: 15px;
   cursor: pointer;
-  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24); }
+  box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
+  z-index: 10; }
   .ttitle:hover {
     opacity: 0.9; }
 
@@ -270,7 +277,7 @@ h2 {
 .selected {
   background-color: #1976D2;
   color: #FFFFFF;
-  z-index: 10; }
+  z-index: 11; }
 
 .red-star::after {
   content: " *";
