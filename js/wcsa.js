@@ -1,5 +1,5 @@
 
-// Global object is defined elsewhere potentially
+// Global object is potentially defined elsewhere
 if( typeof WCSA === 'undefined' ) {
     WCSA = {};
 }
@@ -90,7 +90,7 @@ WCSA.new_grave = function(project, cemetery, section, id) {
     })
     .fail(function(e) {
         WCSA.error('Unable to submit due to ' + e);
-        console.log(e)
+        console.log(e);
     });
 };
 
@@ -538,7 +538,7 @@ WCSA.error = function(msg) {
     setTimeout(function() {$('#error_header').fadeOut('slow')}, 10000);
 
     // Need to make this show up for the user
-    console.log(msg)
+    console.log(msg);
     // Show a header briefly with error message
 };
 
@@ -550,7 +550,7 @@ WCSA.warn = function(msg) {
     wb.style.display = 'block';
     setTimeout(function() {$('#warn_header').fadeOut('slow')}, 10000);
 
-    console.log(msg)
+    console.log(msg);
 }
 
 WCSA.move_survey_item = function(event, direction, hierarchylvl, uid) {
@@ -1233,6 +1233,7 @@ WCSA.delete_survey_item = function(event, uid) {
 };
 
 WCSA.show_scope_survey = function(scope) {
+    // ignores passed variable for now - but may be important in future
     $('.scope_list').hide()
     $('.scope_pics').hide();
     document.getElementById('pictures_footer').style.display = '';
@@ -1240,6 +1241,7 @@ WCSA.show_scope_survey = function(scope) {
 }
 
 WCSA.show_scope_contents = function(scope) {
+    // ignores passed variable for now - but may be important in future
     $('.scope_survey').hide();
     $('.scope_pics').hide();
     $('.bookmarks_list').hide();
@@ -1390,7 +1392,7 @@ WCSA.toggle_camera = function() {
             target = document.getElementById('picture_carousel');
             for(i = 0; i < data.length; i += 1) {
                 photo_fp = WCSA.base_path + 'photographs/' + data[i];
-                htmls += '<img id="' + data[i] + '" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" width="100" height="100" draggable="true">';
+                htmls += '<img id="' + data[i] + '" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" draggable="true">';
             }
             target.innerHTML = htmls;
 
@@ -1617,10 +1619,15 @@ WCSA.show_scope_pictures = function() {
 
 WCSA.show_photo = function(photo_path, name) {
     $('.modal-title', '#main_modal').html('<h2>' + name + '</h2>');
-    $('.modal-body', '#main_modal').html('<img src="' + photo_path + '" width="100%">');
+    $('.modal-body', '#main_modal').html('<img id="zoom_image" src="' + photo_path + '" width="100%" data-zoom-image="' + photo_path + '">');
     $('.btn-primary', '#main_modal').hide();
     // Show the modal
     $('#main_modal').modal('toggle');
+
+    $("#zoom_image").elevateZoom({
+        zoomWindowPosition: 1,
+        zoomWindowOffetx: 10
+    });
 };
 
 WCSA.bookmark = function() {

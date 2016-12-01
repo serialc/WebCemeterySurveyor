@@ -79,7 +79,7 @@ class wcsalib {
             case "surveys":
                 # Load survey in JS
                 print '<script type="text/javascript"> WCSA = {"survey": ' . $this->_load_json_survey($project, 'json') . ',' .
-                    '"id": {"scope": "section", "project": "' . $project . '"}' .
+                    '"id": {"scope": "project", "project": "' . $project . '"}' .
                     '}; </script>'; 
                 $this->_show_cemeteries($project);
                 $this->_show_bookmarks($project);
@@ -1001,7 +1001,7 @@ class wcsalib {
 
             print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
+                '<div class="col-xs-8 item"><a class="link_item scopedropzone" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
                 ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . $reqnum_missing . " required question(s) not completed:\n" . implode("\n", array_keys($reqname_missing)) .'"></i>' : '' ) . 
                 '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'cemetery\',\'' . $project . '\',\'' . $c . '\',\'\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
@@ -1131,6 +1131,11 @@ class wcsalib {
 
         # Move the photo
         switch($data['id']['scope']) {
+        case 'project':
+            # Move the photograph
+            rename( $this->data . $data['id']['project'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            break;
+
         case 'cemetery':
             # Move the photograph
             rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);

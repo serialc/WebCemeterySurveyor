@@ -83,8 +83,9 @@ if ( $reqlen == 0 ) {
     if( $reqlen == 2 && $reqp[0] == 'surveys' ) {
         $headtext .= '<a href="' . $wcsa->basepath . 'surveys/' . $reqp[1] . '">Project ' . $reqp[1] . '</a></div>' . $subheadtext . '</div>';
         $headtext .= '<div title="Cemeteries list" onclick="WCSA.show_scope_contents(\'project\')" class="nav-item pull-xs-right pointer"><i class="fa fa-th-large" aria-hidden="true"></i></div>';
-        $headtext .= '<div title="Edit survey" class="nav-item pull-xs-right pointer"><a href="' . $wcsa->basepath . 'editsurvey/' . $reqp[1] . '"><i class="fa fa-wrench" aria-hidden="true"></i></a></div>';
+        //$headtext .= '<div title="Toggle picture importing" onclick="WCSA.toggle_camera(\'survey\')" class="nav-item pull-xs-right pointer scope_list" style="display: block"><i class="fa fa-camera" aria-hidden="true"></i></div>';
         $headtext .= '<div title="See bookmarks for this survey project" onclick="WCSA.show_bookmarks()" class="nav-item pull-xs-right pointer"><i class="fa fa-bookmark" aria-hidden="true"></i></div>';
+        $headtext .= '<div title="Edit survey" class="nav-item pull-xs-right pointer"><a href="' . $wcsa->basepath . 'editsurvey/' . $reqp[1] . '"><i class="fa fa-wrench" aria-hidden="true"></i></a></div>';
         $headtext .= '<div title="Export/download project data" class="nav-item pull-xs-right pointer"><a href="' . $wcsa->basepath . 'inc/export.php?survey=' . $reqp[1] . '"><i class="fa fa-download" aria-hidden="true"></i></a></div>';
     }
     if( $reqlen == 4 && $reqp[2] == 'cemeteries' ) {
@@ -172,6 +173,8 @@ $wcsa->page_request(explode('/', rtrim($req, '/')));
     <script src="/WCS/js/tether.min.js" integrity="sha384-Plbmg8JY28KFelvJVai01l8WyZzrYWG825m+cZ0eDDS1f7d/js6ikvy1+X+guPIB" crossorigin="anonymous"></script>
     <script src="/WCS/js/bootstrap.min.js" integrity="sha384-VjEeINv9OSwtWFLAtmc4JCtEJXXBub00gtSnszmspDLCtC0I4z4nqz7rEFbIZLLU" crossorigin="anonymous"></script>
 
+    <!-- other -->
+    <script type="text/javascript" src="/WCS/js/jquery.elevatezoom.js"></script>
     <!-- WCSA -->
     <script type="text/javascript" src="/WCS/js/wcsa.js"></script>
   </body>
