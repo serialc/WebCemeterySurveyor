@@ -179,7 +179,7 @@ h2 {
   .pointer:hover {
     color: #014c8c; }
 
-.scope_survey, .scope_pics, .bookmarks_list {
+.scope_pics, .bookmarks_list, .scope_list {
   display: none; }
 
 /* ---------------- Survey editing -------------------------------- */

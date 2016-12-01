@@ -431,8 +431,8 @@ class wcsalib {
         if( count($survey) > 1 ) {
             # Build tabs at top of page
             # We ony display these next two elements by default for the grave as it is directly visible on arrival
-            print '<div id="ttitlespacer" class="scope_survey" style="' . ($scope === 'grave' ? 'display: block':'') . '"></div>';
-            print '<div id="ttitleheader" class="row scope_survey navbar-fixed-top" style="' . ($scope === 'grave' ? 'display: block':'') . '">';
+            print '<div id="ttitlespacer" class="scope_survey"></div>';
+            print '<div id="ttitleheader" class="row scope_survey navbar-fixed-top">';
             for( $tabnum = 0; $tabnum < count($survey); $tabnum += 1 ) {
                 $tabcolw = round(12/count($survey));
                 print '<div class="col-xs-' . $tabcolw . ' upper ttitle' . ($tabnum === 0 ? ' selected' : '') . '" onclick="WCSA.show_tab_section(this, \'tab_' . $tabnum . '\')">';
@@ -987,9 +987,9 @@ class wcsalib {
         $reqname = $this->_get_scope_required_questions($survey);
         $reqnum = count($reqname);
 
-        print '<div class="row scope_list"><h2 class="col-xs-12 correction">Cemeteries</h2></div>';
+        print '<div class="row scope_list" style="display: block"><h2 class="col-xs-12 correction">Cemeteries</h2></div>';
 
-        print '<div class="row scope_list">';
+        print '<div class="row scope_list" style="display: block">';
         foreach($clist as $c) {
 
             # Get the data for this cemetery and see how many of the required fields in the $survey are present the state data
@@ -1378,6 +1378,9 @@ class wcsalib {
     public function export($project) {
         $names = $this->_get_existing_survey_category_names($project, true);
 
+        # file extension
+        $ext = '.tsv';
+
         # Save data
         $save_name = $project . '_' . date('Y-m-d_H-i-s');
         $save_path = $this->export_dir . $save_name . '/';
@@ -1496,14 +1499,14 @@ class wcsalib {
         $gdata = trim($gdata, $nl);
 
         # data
-        file_put_contents($save_path . 'cemetery_data.txt', $cdata);
-        file_put_contents($save_path . 'section_data.txt', $sdata);
-        file_put_contents($save_path . 'grave_data.txt', $gdata);
+        file_put_contents($save_path . 'cemetery_data' . $ext, $cdata);
+        file_put_contents($save_path . 'section_data' . $ext, $sdata);
+        file_put_contents($save_path . 'grave_data' . $ext, $gdata);
         
         # photographs
-        file_put_contents($save_path . 'cemetery_photos.txt', $cphoto);
-        file_put_contents($save_path . 'section_photos.txt', $sphoto);
-        file_put_contents($save_path . 'grave_photos.txt', $gphoto);
+        file_put_contents($save_path . 'cemetery_photos' . $ext, $cphoto);
+        file_put_contents($save_path . 'section_photos' . $ext, $sphoto);
+        file_put_contents($save_path . 'grave_photos' . $ext, $gphoto);
         
         # Zip it all
         chdir($this->export_dir);
