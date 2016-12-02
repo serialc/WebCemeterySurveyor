@@ -1490,6 +1490,15 @@ WCSA.toggle_featurepics= function() {
             switch(WCSA.id.scope) {
                 case 'cemetery':
                     photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/photographs/';
+                break;
+
+                case 'section':
+                    photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/' + WCSA.id.section + '/photographs/';
+                break;
+
+                case 'grave':
+                    photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/' + WCSA.id.section + '/' + WCSA.id.grave + '/photographs/';
+                break;
             }
 
             // Show the available images in the carrousel
