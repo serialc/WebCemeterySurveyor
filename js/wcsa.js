@@ -1366,18 +1366,69 @@ WCSA.show_tab_section = function(elem, tid) {
     elem.classList.add('selected');
 };
 
-WCSA.toggle_camera = function() {
-    var target,
-        elems,
-        htmls = '',
-        photo_fp,
-        counter,
-        i;
-        
-    target = document.getElementById('pictures_footer');
+WCSA.move_photo_between_feature = function(photoname, direction) {
+    var unsorted_cont,
+        htmlimg = document.getElementById(photoname);
 
-    if( target.style.display === '' || target.style.display === 'none' ) {
-        target.style.display = 'block';
+    // This is only possible/enabled if the unsorted pictures folder is visible
+    unsorted_cont = document.getElementById('unsorted_carousel');
+    if( unsorted_cont.style.display === '' || unsorted_cont.style.display === 'none' ) {
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: WCSA.base_path + "inc/move_photographs.php",
+        data: {"id": WCSA.id, "direction": direction, "picture": photoname}
+    })
+    .done(function(msg) {
+        // Move the photograph on the page with JS
+        // Reinitialize the picture behaviours by reloading both strips/carousels
+        WCSA.toggle_unsortedpics();
+        WCSA.toggle_unsortedpics();
+        WCSA.toggle_featurepics();
+        WCSA.toggle_featurepics();
+        //htmlimg = htmlimg.parentNode.removeChild(htmlimg)
+        if( direction === 'unsorted' ) {
+            // unsorted_carousel
+            //document.getElementById('unsorted_carousel').prepend(htmlimg)
+
+            // need to dissociate any attributes of this picture
+            $.ajax({
+                type: "POST",
+                url: WCSA.base_path + "inc/associate_photo.php",
+                dataType: "json",
+                data:  {"action": "unlink", "picture": photoname, "id": WCSA.id}
+            })
+            .done(function(msg) {})
+            .fail(function(e) { WCSA.warn(e); console.log(e); });
+
+        }
+        if( direction === 'scope' ) {
+            // picture_carousel
+            //document.getElementById('picture_carousel').prepend(htmlimg)
+        }
+    })
+    .fail(function(e) {
+        WCSA.warn(e);
+    });
+};
+
+WCSA.toggle_unsortedpics = function() {
+    var unsorted_cont,
+        parent_cont,
+        feature_cont,
+        htmls = '';
+
+    parent_cont = document.getElementById('pictures_footer');
+    unsorted_cont = document.getElementById('unsorted_carousel');
+    feature_cont = document.getElementById('picture_carousel');
+
+    if( unsorted_cont.style.display === '' || unsorted_cont.style.display === 'none' ) {
+        // Display the unsorted photographs and adjust the styling of the other carousel
+        unsorted_cont.style.display = 'block';
+        parent_cont.style.height = '600px';
 
         // Load the pictures list and display the thumbnails in 'picture_carousel'
         $.ajax({
@@ -1386,15 +1437,67 @@ WCSA.toggle_camera = function() {
             url: WCSA.base_path + "inc/get_picture_list.php"
         })
         .done(function(data) {
-            counter = 0;
-
             // Show the available images in the carrousel
-            target = document.getElementById('picture_carousel');
             for(i = 0; i < data.length; i += 1) {
                 photo_fp = WCSA.base_path + 'photographs/' + data[i];
-                htmls += '<img id="' + data[i] + '" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" draggable="true">';
+                //htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Click to move up to feature. Double click to enlarge" src="' + photo_fp + '" draggable="true">';
+                htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" title="Click to move photograph to feature." src="' + photo_fp + '" draggable="true">';
             }
-            target.innerHTML = htmls;
+            unsorted_cont.innerHTML = htmls;
+        })
+        .fail(function(e) {
+            WCSA.warn("Couldn't load list of unsorted photographs");
+        });
+
+
+    } else {
+        unsorted_cont.style.display = '';
+        parent_cont.style.height = '300px';
+
+        // delete all child nodes/pictures
+        while (unsorted_cont.firstChild) {
+            unsorted_cont.removeChild(unsorted_cont.firstChild);
+        }
+    }
+};
+
+WCSA.toggle_featurepics= function() {
+    var target,
+        elems,
+        htmls = '',
+        photo_fp,
+        photo_dir,
+        counter,
+        i;
+        
+    parent_cont = document.getElementById('pictures_footer');
+    feature_cont = document.getElementById('picture_carousel');
+
+    if( parent_cont.style.display === '' || parent_cont.style.display === 'none' ) {
+        parent_cont.style.display = 'block';
+
+        // Load the pictures list for this scope feature and display the thumbnails in 'picture_carousel'
+        $.ajax({
+            type: "POST",
+            url: WCSA.base_path + "inc/get_scope_pic_files.php",
+            dataType: "json", 
+            data: WCSA.id
+        })
+        .done(function(data) {
+            counter = 0;
+
+            photo_dir = WCSA.base_path;
+            switch(WCSA.id.scope) {
+                case 'cemetery':
+                    photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/photographs/';
+            }
+
+            // Show the available images in the carrousel
+            for(i = 0; i < data.length; i += 1) {
+                photo_fp = photo_dir + data[i];
+                htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'unsorted\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" draggable="true">';
+            }
+            feature_cont.innerHTML = htmls;
 
             function prep_drop_targets() {
                 // Prepare all the drag and drop functionality for the targets
@@ -1481,8 +1584,8 @@ WCSA.toggle_camera = function() {
                         .done(function(e) {
                             // On successful move
                             // Remove picture from picture_carousel
-                            thumbnail = document.getElementById(event.dataTransfer.getData('text'));
-                            thumbnail.parentNode.removeChild(thumbnail);
+                            //thumbnail = document.getElementById(event.dataTransfer.getData('text'));
+                            //thumbnail.parentNode.removeChild(thumbnail);
                         })
                         .fail(function(e) {
                             WCSA.error("Unable to move photograph to associate it with this feature: " + e.responseText);     
@@ -1531,7 +1634,7 @@ WCSA.toggle_camera = function() {
             }
 
             // Go through all the draggable imgs and add dragstart to them
-            elems = target.children;
+            elems = feature_cont.children;
             for(i = 0; i < elems.length; i += 1) {
                 elems[i].addEventListener('dragstart', function(event) {
                     event.dataTransfer.setData('text', this.id);
@@ -1544,7 +1647,12 @@ WCSA.toggle_camera = function() {
             WCSA.error("Unable to update data on server.");
         });
     } else {
-        target.style.display = 'none';
+        parent_cont.style.display = 'none';
+
+        // delete all child nodes/pictures
+        while (feature_cont.firstChild) {
+            feature_cont.removeChild(feature_cont.firstChild);
+        }
     }
 };
 

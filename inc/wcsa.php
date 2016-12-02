@@ -390,6 +390,10 @@ class wcsalib {
 
         # add to base path based on scope
         switch($scope) {
+        case 'project':
+            $fp .= $identobj['cemetery'] . '.json';
+            break;
+
         case 'cemetery':
             $fp .= $identobj['cemetery'] . '.json';
             break;
@@ -763,6 +767,31 @@ class wcsalib {
 
         return json_encode($data['photographs'], JSON_PRETTY_PRINT);
     }
+
+    public function get_scope_photograph_folder_files($idobj) {
+        $pdir = '';
+
+        switch( $idobj['scope'] ) {
+        case 'cemetery':
+            $pdir = $this->data . $idobj['project'] . '/' . $idobj['cemetery'] . '/photographs';
+            break;
+
+        case 'section':
+            $pdir = $this->data . $idobj['project'] . '/' . $idobj['cemetery'] . '/' . $idobj['section'] . '/photographs';
+            break;
+
+        case 'grave':
+            $pdir = $this->data . $idobj['project'] . '/' . $idobj['cemetery'] . '/' . $idobj['section'] . '/' . $idobj['grave'] . '/photographs';
+            break;
+
+        default:
+            $this->send_error("Scope type not expected in build_scope_pictures().");
+            $this->_response('', 500);
+            return '';
+        }
+
+        return $this->_list_files($pdir);
+    }
     
     # Returns the list of photographs in the unsorted photographs folder
     public function get_unsorted_photographs() {
@@ -1001,7 +1030,7 @@ class wcsalib {
 
             print '<div class="col-md-4 col-sm-6 col-xs-12">' .
                 '<div class="row">' .
-                '<div class="col-xs-8 item"><a class="link_item scopedropzone" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
+                '<div class="col-xs-8 item"><a class="link_item" href="' . $this->basepath . 'surveys/' . $project . '/cemeteries/' . $c .'">' . $c .
                 ( $reqnum_missing !== 0 ? ' <i class="fa fa-exclamation-triangle accent" aria-hidden="true" title="' . $reqnum_missing . " required question(s) not completed:\n" . implode("\n", array_keys($reqname_missing)) .'"></i>' : '' ) . 
                 '</a></div>' .
                 '<div class="col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.edit_scope_item_name(\'cemetery\',\'' . $project . '\',\'' . $c . '\',\'\',\'\')"><i class="fa fa-pencil" aria-hidden="true"></i></a></div>' .
@@ -1122,39 +1151,56 @@ class wcsalib {
         return($htmls);
     }
     public function disassociate_photo($data) {
+
         # we want to update the json data for this scope item
         $state = $this->_load_scope_state($data['id']['scope'], $data['id']);
-        # remove this photograph
+
+        # remove this photograph from the json
         unset($state['photographs'][$data['picture']]);
+
         # Save the update state data
         $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
 
+        return true;
+    }
+
+    public function move_photograph($data) {
+        $scopepath = '';
+
         # Move the photo
         switch($data['id']['scope']) {
-        case 'project':
-            # Move the photograph
-            rename( $this->data . $data['id']['project'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
-            break;
-
         case 'cemetery':
             # Move the photograph
-            rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            $scopepath = $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/photographs/' . $data['picture'];
             break;
 
         case 'section':
             # Move the photograph
-            rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            $scopepath = $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/photographs/' . $data['picture'];
             break;
 
         case 'grave':
             # Move the photograph
-            rename( $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/' . $data['id']['grave'] . '/photographs/' . $data['picture'], $this->photo_dir . $data['picture']);
+            $scopepath = $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/' . $data['id']['grave'] . '/photographs/' . $data['picture'];
             break;
 
         default:
             $this->send_error("Unable to find proper scope to relocate photograph.");
             return false;
         }
+       
+        switch($data['direction']) {
+        case 'scope':
+            rename( $this->photo_dir . $data['picture'], $scopepath);
+            break;
+        case 'unsorted':
+            rename($scopepath, $this->photo_dir . $data['picture']);
+            break;
+        default:
+            $this->send_error("Unable to find proper destination to relocate photograph.");
+            return false;
+        }
+
         return true;
     }
 
@@ -1175,26 +1221,6 @@ class wcsalib {
             $state['photographs'][$data['picture']] = array("name" => $data['name'], "attribute" => $data['attribute']);
         } else {
             $state['photographs'][$data['picture']] = array("name" => $data['name']);
-        }
-
-        switch($data['id']['scope']) {
-        case 'cemetery':
-            # Move the photograph
-            rename($this->photo_dir . $data['picture'], $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/photographs/' . $data['picture']);
-            break;
-
-        case 'section':
-            # Move the photograph
-            rename($this->photo_dir . $data['picture'], $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/photographs/' . $data['picture']);
-            break;
-
-        case 'grave':
-            # Move the photograph
-            rename($this->photo_dir . $data['picture'], $this->data . $data['id']['project'] . '/' . $data['id']['cemetery'] . '/' . $data['id']['section'] . '/' . $data['id']['grave'] . '/photographs/' . $data['picture']);
-            break;
-
-        default:
-            $this->send_error("Unable to find proper scope to relocate photograph.");
         }
 
         # Save the update state data
