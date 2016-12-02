@@ -10,6 +10,10 @@ window.onload = function() {
         case '#bookmark':
             WCSA.show_bookmarks();
         break;
+
+        case '#list':
+            WCSA.show_scope_contents('');
+        break;
     }
 }
 
@@ -68,6 +72,7 @@ WCSA.new_scope_item = function(scope, project, cemetery, section) {
             $('#main_modal').modal('toggle');
             // disable click
             $('.btn-primary', '#main_modal').html('Submit').off('click');
+            window.location = '#list'
             location.reload();
         })
         .fail(function(e) {
@@ -86,6 +91,7 @@ WCSA.new_grave = function(project, cemetery, section, id) {
         data: {"type": 'new_scope_item', "scope": 'grave', "project": project, "cemetery": cemetery, "section": section, "grave": id}
     })
     .done(function() {
+        window.location = '#list'
         location.reload();
     })
     .fail(function(e) {
@@ -1240,6 +1246,7 @@ WCSA.show_scope_survey = function(scope) {
     $('.scope_survey').show();
 }
 
+// Show the list of sub-items
 WCSA.show_scope_contents = function(scope) {
     // ignores passed variable for now - but may be important in future
     $('.scope_survey').hide();
