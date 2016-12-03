@@ -1392,10 +1392,8 @@ WCSA.move_photo_between_feature = function(photoname, direction) {
     .done(function(msg) {
         // Move the photograph on the page with JS
         // Reinitialize the picture behaviours by reloading both strips/carousels
-        WCSA.toggle_unsortedpics();
-        WCSA.toggle_unsortedpics();
-        WCSA.toggle_featurepics();
-        WCSA.toggle_featurepics();
+        WCSA.populate_unsortedpics(true); // true - reset/remove previous
+        WCSA.populate_featurepics(true); // true - reset/remove previous
         //htmlimg = htmlimg.parentNode.removeChild(htmlimg)
         if( direction === 'unsorted' ) {
             // unsorted_carousel
@@ -1419,6 +1417,7 @@ WCSA.move_photo_between_feature = function(photoname, direction) {
     })
     .fail(function(e) {
         WCSA.warn(e);
+        console.log(e);
     });
 };
 
@@ -1437,25 +1436,7 @@ WCSA.toggle_unsortedpics = function() {
         unsorted_cont.style.display = 'block';
         parent_cont.style.height = '600px';
 
-        // Load the pictures list and display the thumbnails in 'picture_carousel'
-        $.ajax({
-            type: "GET",
-            dataType: "json",
-            url: WCSA.base_path + "inc/get_picture_list.php"
-        })
-        .done(function(data) {
-            // Show the available images in the carrousel
-            for(i = 0; i < data.length; i += 1) {
-                photo_fp = WCSA.base_path + 'photographs/' + data[i];
-                //htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Click to move up to feature. Double click to enlarge" src="' + photo_fp + '" draggable="true">';
-                htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" title="Click to move photograph to feature." src="' + photo_fp + '" draggable="true">';
-            }
-            unsorted_cont.innerHTML = htmls;
-        })
-        .fail(function(e) {
-            WCSA.warn("Couldn't load list of unsorted photographs");
-        });
-
+        WCSA.populate_unsortedpics(false);
 
     } else {
         unsorted_cont.style.display = '';
@@ -1468,200 +1449,247 @@ WCSA.toggle_unsortedpics = function() {
     }
 };
 
-WCSA.toggle_featurepics= function() {
+WCSA.populate_unsortedpics = function(reset) {
+
+    var unsorted_cont = document.getElementById('unsorted_carousel');
+        htmls = '';
+
+
+    if( reset ) {
+        // delete all child nodes/pictures
+        while (unsorted_cont.firstChild) {
+            unsorted_cont.removeChild(unsorted_cont.firstChild);
+        }
+    }
+
+    // Load the pictures list and display the thumbnails in 'picture_carousel'
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: WCSA.base_path + "inc/get_picture_list.php"
+    })
+    .done(function(data) {
+        // Show the available images in the carrousel
+        for(i = 0; i < data.length; i += 1) {
+            photo_fp = WCSA.base_path + 'photographs/' + data[i];
+            //htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Click to move up to feature. Double click to enlarge" src="' + photo_fp + '" draggable="true">';
+            htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" title="Click to move photograph to feature." src="' + photo_fp + '" draggable="true">';
+        }
+        unsorted_cont.innerHTML = htmls;
+    })
+    .fail(function(e) {
+        WCSA.warn("Couldn't load list of unsorted photographs");
+    });
+};
+
+WCSA.populate_featurepics = function(reset) {
     var target,
         elems,
         htmls = '',
         photo_fp,
         photo_dir,
         counter,
-        i;
-        
-    parent_cont = document.getElementById('pictures_footer');
-    feature_cont = document.getElementById('picture_carousel');
+        i, 
+        feature_cont = document.getElementById('picture_carousel');
+
+    if( reset ) {
+        // delete all child nodes/pictures
+        while (feature_cont.firstChild) {
+            feature_cont.removeChild(feature_cont.firstChild);
+        }
+    }
+
+    // Load the pictures list for this scope feature and display the thumbnails in 'picture_carousel'
+    $.ajax({
+        type: "POST",
+        url: WCSA.base_path + "inc/get_scope_pic_files.php",
+        dataType: "json", 
+        data: WCSA.id
+    })
+    .done(function(data) {
+        counter = 0;
+
+        photo_dir = WCSA.base_path;
+        switch(WCSA.id.scope) {
+            case 'cemetery':
+                photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/photographs/';
+            break;
+
+            case 'section':
+                photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/' + WCSA.id.section + '/photographs/';
+            break;
+
+            case 'grave':
+                photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/' + WCSA.id.section + '/' + WCSA.id.grave + '/photographs/';
+            break;
+        }
+
+        // Show the available images in the carrousel
+        for(i = 0; i < data.length; i += 1) {
+            photo_fp = photo_dir + data[i];
+            htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'unsorted\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" draggable="true">';
+        }
+        feature_cont.innerHTML = htmls;
+
+        function prep_drop_targets() {
+            // Prepare all the drag and drop functionality for the targets
+            var idp,
+                j,
+                k,
+                target,
+                lasttarget,
+                data,
+                thumbnail,
+                DDenter, DDover, DDdrop, DDleave,
+                targets = document.getElementsByClassName('dropzone');
+
+                // DRAGENTER
+                DDenter = function( event ) {
+                    counter += 1;
+                    this.style.borderColor = 'green';
+                    this.style.borderStyle = 'solid';
+
+                    // Bubble up to get the id of the dragzone element
+                    target = event.target;
+                    for( k = 0; k < 3; k += 1 ) {
+                        if( !target.classList || !target.classList.contains('dropzone') ) {
+                            // overwrite with parent
+                            target = target.parentNode;
+                            continue;
+                        }
+                        // found it
+                        break;
+                    }
+
+                    // See if this is the dropzone as the last, reset the last one if not
+                    if( lasttarget !== target && lasttarget !== undefined ) {
+                        lasttarget.style.borderColor = '';
+                        lasttarget.style.borderStyle = '';
+                    }
+                    lasttarget = target;
+                };
+                
+                // DRAGOVER
+                DDover = function( event ) {
+                    event.preventDefault();
+                }
+
+                // DROP
+                DDdrop = function( event ) {
+                    // prevent URL follow
+                    event.preventDefault();
+
+                    // retrieve data passed on dragstart and process it
+
+                    // Bubble up to get the id of the dragzone element
+                    target = event.target;
+                    for( k = 0; k < 3; k += 1 ) {
+                        // Shouldn't be any farther than 2 jumps...
+                        if( !target.classList || !target.classList.contains('dropzone') ) {
+                            // overwrite with parent
+                            target = target.parentNode;
+                            continue;
+                        }
+                        // found it
+                        break;
+                    }
+
+                    // remove highlights
+                    this.style.borderColor = '';
+                    this.style.borderStyle = '';
+
+                    // ask the server to move the image to this scope's picture folder
+                    // Also add data to this scopes data file with the file name and associated NAME and, possible ATTRIBUTE
+                    idp = target.id.split(':::');
+                    if( idp.length === 2 ) {
+                        data = {"action": "associate", "picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0], "attribute": idp[1]};
+                    } else {
+                        data = {"action": "associate", "picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0]};
+                    }
+
+                    $.ajax({
+                        type: "POST",
+                        url: WCSA.base_path + "inc/associate_photo.php",
+                        dataType: "json", 
+                        data: data
+                    })
+                    .done(function(e) {
+                        // On successful move
+                        // Remove picture from picture_carousel
+                        //thumbnail = document.getElementById(event.dataTransfer.getData('text'));
+                        //thumbnail.parentNode.removeChild(thumbnail);
+                    })
+                    .fail(function(e) {
+                        WCSA.error("Unable to move photograph to associate it with this feature: " + e.responseText);     
+                    })
+                };
+
+                // DRAGLEAVE
+                DDleave = function( event ) {
+                    counter -= 1;
+                    if( counter === 0 ) {
+                        this.style.borderColor = '';
+                        this.style.borderStyle = '';
+                    }
+                };
+
+            // Make all potential targets highlighted
+            for(j = 0; j < targets.length; j += 1) {
+                targets[j].classList.add('active_dz')
+
+                targets[j].addEventListener('dragenter',  DDenter, false);
+                targets[j].addEventListener('dragover',  DDover, false); // important, otherwise 'drop' will not be called/captured
+                targets[j].addEventListener('drop',  DDdrop, false);
+                targets[j].addEventListener('dragleave',  DDleave, false);
+            }
+
+            // Listen for global 'drop' to undo highlights and removeEventListeners!
+            document.addEventListener('drop', function(event) {
+                // prevent URL follow
+                event.preventDefault();
+                // hide highlights for all possible targets
+                for(j = 0; j < targets.length; j += 1) {
+                    targets[j].classList.remove('active_dz')
+                    targets[j].removeEventListener('dragenter',  DDenter, false);
+                    targets[j].removeEventListener('dragover',  DDover, false);
+                    targets[j].removeEventListener('drop',  DDdrop, false);
+                    targets[j].removeEventListener('dragleave',  DDleave, false);
+                }
+                // need to reset counter as we possible dropped inside a cell (counter !== 0)
+                counter = 0;
+            }, false);
+
+            // necessary for global drop to be caught above
+            document.addEventListener('dragover', function(event) {
+                event.preventDefault();
+            }, false);
+        }
+
+        // Go through all the draggable imgs and add dragstart to them
+        elems = feature_cont.children;
+        for(i = 0; i < elems.length; i += 1) {
+            elems[i].addEventListener('dragstart', function(event) {
+                event.dataTransfer.setData('text', this.id);
+                prep_drop_targets();
+            }, false);
+        }
+    })
+    .fail(function(e) {
+        console.log(e);
+        WCSA.error("Unable to update data on server.");
+    });
+};
+
+WCSA.toggle_featurepics= function() {
+
+    var parent_cont = document.getElementById('pictures_footer'),
+        feature_cont = document.getElementById('picture_carousel');
 
     if( parent_cont.style.display === '' || parent_cont.style.display === 'none' ) {
         parent_cont.style.display = 'block';
 
-        // Load the pictures list for this scope feature and display the thumbnails in 'picture_carousel'
-        $.ajax({
-            type: "POST",
-            url: WCSA.base_path + "inc/get_scope_pic_files.php",
-            dataType: "json", 
-            data: WCSA.id
-        })
-        .done(function(data) {
-            counter = 0;
+        WCSA.populate_featurepics(false);
 
-            photo_dir = WCSA.base_path;
-            switch(WCSA.id.scope) {
-                case 'cemetery':
-                    photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/photographs/';
-                break;
-
-                case 'section':
-                    photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/' + WCSA.id.section + '/photographs/';
-                break;
-
-                case 'grave':
-                    photo_dir += 'data/' + WCSA.id.project + '/' + WCSA.id.cemetery + '/' + WCSA.id.section + '/' + WCSA.id.grave + '/photographs/';
-                break;
-            }
-
-            // Show the available images in the carrousel
-            for(i = 0; i < data.length; i += 1) {
-                photo_fp = photo_dir + data[i];
-                htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'unsorted\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Double click to enlarge" src="' + photo_fp + '" draggable="true">';
-            }
-            feature_cont.innerHTML = htmls;
-
-            function prep_drop_targets() {
-                // Prepare all the drag and drop functionality for the targets
-                var idp,
-                    j,
-                    k,
-                    target,
-                    lasttarget,
-                    data,
-                    thumbnail,
-                    DDenter, DDover, DDdrop, DDleave,
-                    targets = document.getElementsByClassName('dropzone');
-
-                    // DRAGENTER
-                    DDenter = function( event ) {
-                        counter += 1;
-                        this.style.borderColor = 'green';
-                        this.style.borderStyle = 'solid';
-
-                        // Bubble up to get the id of the dragzone element
-                        target = event.target;
-                        for( k = 0; k < 3; k += 1 ) {
-                            if( !target.classList || !target.classList.contains('dropzone') ) {
-                                // overwrite with parent
-                                target = target.parentNode;
-                                continue;
-                            }
-                            // found it
-                            break;
-                        }
-
-                        // See if this is the dropzone as the last, reset the last one if not
-                        if( lasttarget !== target && lasttarget !== undefined ) {
-                            lasttarget.style.borderColor = '';
-                            lasttarget.style.borderStyle = '';
-                        }
-                        lasttarget = target;
-                    };
-                    
-                    // DRAGOVER
-                    DDover = function( event ) {
-                        event.preventDefault();
-                    }
-
-                    // DROP
-                    DDdrop = function( event ) {
-                        // prevent URL follow
-                        event.preventDefault();
-
-                        // retrieve data passed on dragstart and process it
-
-                        // Bubble up to get the id of the dragzone element
-                        target = event.target;
-                        for( k = 0; k < 3; k += 1 ) {
-                            // Shouldn't be any farther than 2 jumps...
-                            if( !target.classList || !target.classList.contains('dropzone') ) {
-                                // overwrite with parent
-                                target = target.parentNode;
-                                continue;
-                            }
-                            // found it
-                            break;
-                        }
-
-                        // remove highlights
-                        this.style.borderColor = '';
-                        this.style.borderStyle = '';
-
-                        // ask the server to move the image to this scope's picture folder
-                        // Also add data to this scopes data file with the file name and associated NAME and, possible ATTRIBUTE
-                        idp = target.id.split(':::');
-                        if( idp.length === 2 ) {
-                            data = {"action": "associate", "picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0], "attribute": idp[1]};
-                        } else {
-                            data = {"action": "associate", "picture": event.dataTransfer.getData('text'), "id": WCSA.id, "name": idp[0]};
-                        }
-
-                        $.ajax({
-                            type: "POST",
-                            url: WCSA.base_path + "inc/associate_photo.php",
-                            dataType: "json", 
-                            data: data
-                        })
-                        .done(function(e) {
-                            // On successful move
-                            // Remove picture from picture_carousel
-                            //thumbnail = document.getElementById(event.dataTransfer.getData('text'));
-                            //thumbnail.parentNode.removeChild(thumbnail);
-                        })
-                        .fail(function(e) {
-                            WCSA.error("Unable to move photograph to associate it with this feature: " + e.responseText);     
-                        })
-                    };
-
-                    // DRAGLEAVE
-                    DDleave = function( event ) {
-                        counter -= 1;
-                        if( counter === 0 ) {
-                            this.style.borderColor = '';
-                            this.style.borderStyle = '';
-                        }
-                    };
-
-                // Make all potential targets highlighted
-                for(j = 0; j < targets.length; j += 1) {
-                    targets[j].classList.add('active_dz')
-
-                    targets[j].addEventListener('dragenter',  DDenter, false);
-                    targets[j].addEventListener('dragover',  DDover, false); // important, otherwise 'drop' will not be called/captured
-                    targets[j].addEventListener('drop',  DDdrop, false);
-                    targets[j].addEventListener('dragleave',  DDleave, false);
-                }
-
-                // Listen for global 'drop' to undo highlights and removeEventListeners!
-                document.addEventListener('drop', function(event) {
-                    // prevent URL follow
-                    event.preventDefault();
-                    // hide highlights for all possible targets
-                    for(j = 0; j < targets.length; j += 1) {
-                        targets[j].classList.remove('active_dz')
-                        targets[j].removeEventListener('dragenter',  DDenter, false);
-                        targets[j].removeEventListener('dragover',  DDover, false);
-                        targets[j].removeEventListener('drop',  DDdrop, false);
-                        targets[j].removeEventListener('dragleave',  DDleave, false);
-                    }
-                    // need to reset counter as we possible dropped inside a cell (counter !== 0)
-                    counter = 0;
-                }, false);
-
-                // necessary for global drop to be caught above
-                document.addEventListener('dragover', function(event) {
-                    event.preventDefault();
-                }, false);
-            }
-
-            // Go through all the draggable imgs and add dragstart to them
-            elems = feature_cont.children;
-            for(i = 0; i < elems.length; i += 1) {
-                elems[i].addEventListener('dragstart', function(event) {
-                    event.dataTransfer.setData('text', this.id);
-                    prep_drop_targets();
-                }, false);
-            }
-        })
-        .fail(function(e) {
-            console.log(e);
-            WCSA.error("Unable to update data on server.");
-        });
     } else {
         parent_cont.style.display = 'none';
 
