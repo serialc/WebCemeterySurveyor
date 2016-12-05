@@ -440,7 +440,7 @@ class wcsalib {
             for( $tabnum = 0; $tabnum < count($survey); $tabnum += 1 ) {
                 $tabcolw = round(12/count($survey));
                 print '<div class="col-xs-' . $tabcolw . ' upper ttitle' . ($tabnum === 0 ? ' selected' : '') . '" onclick="WCSA.show_tab_section(this, \'tab_' . $tabnum . '\')">';
-                print $survey[$tabnum]['title'];
+                print isset($survey[$tabnum]['title']) ? $survey[$tabnum]['title'] : '';
                 print '</div>';
             }
             print '</div>';
@@ -1332,8 +1332,14 @@ class wcsalib {
         # Iterate through and into hierarcy of tabs and groups
         for( $tabnum = 0; $tabnum < count($survey_frag); $tabnum += 1 ) {
             $tab = $survey_frag[$tabnum];
+
+            if( !isset($tab['contents']) ) { continue; }
+
             for( $grpnum = 0; $grpnum < count($tab['contents']); $grpnum += 1 ) {
                 $group = $tab['contents'][$grpnum];
+
+                if( !isset($group['contents']) ) { continue; }
+
                 # categories are synonymous with questions
                 for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
                     $cat = $group['contents'][$catnum];
