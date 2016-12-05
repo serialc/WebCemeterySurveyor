@@ -67,7 +67,7 @@ if ( $reqlen == 0 ) {
     $subheadtext .= '</div>';
 
     $headtext = 
-        '<div class="nav-item">' .
+        '<div class="nav-item maintitle">' .
         '<div class="nav-main-title">';
 
     # show other headings based on page/path

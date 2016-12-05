@@ -30,6 +30,10 @@ header {
     color: #FFFFFF; }
   header a:hover {
     color: #BBDEFB; }
+  header .maintitle {
+    margin-top: -13px; }
+  header .maintitle div:first-child {
+    font-size: 1em; }
 
 #error_header, #warn_header {
   display: none;
