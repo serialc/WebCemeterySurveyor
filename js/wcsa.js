@@ -183,7 +183,7 @@ WCSA.update_survey_question = function(project, scope, tindex, gindex, qindex, t
 
 WCSA.get_projectname = function() {
     if( !WCSA.projectname ) {
-        WCSA.projectname = document.URL.split('WCS')[1].split('/')[2];
+        WCSA.projectname = decodeURI(document.URL.split('WCS')[1].split('/')[2]);
     }
     return WCSA.projectname;
 };
