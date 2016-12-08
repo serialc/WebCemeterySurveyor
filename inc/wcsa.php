@@ -463,6 +463,7 @@ class wcsalib {
             $dependency_groups_to_hide = array();
 
             # go through the groups in this tab
+            if( !isset($tab['contents']) ) { continue; }
             for( $grpnum = 0; $grpnum < count($tab['contents']); $grpnum += 1 ) {
                 $group = $tab['contents'][$grpnum];
 
@@ -477,6 +478,7 @@ class wcsalib {
                     print '<div class="col-xs-12 gtitle"><h2>' . $group['title'] . '</h2></div>';
                 }
 
+                if( !isset($group['contents']) ) { continue; }
                 # Go through the questions in the group
                 for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
                     $cat = $group['contents'][$catnum];
@@ -1392,12 +1394,15 @@ class wcsalib {
         # Iterate through and into hierarcy of tabs and groups
         foreach( array('cemetery', 'section', 'grave') as $scope) {
             if($byscope) { $snoa[$scope] = array(); };
+            if( !isset($survey[$scope]) ) { continue; }
             $survey_frag = $survey[$scope];
             for( $tabnum = 0; $tabnum < count($survey_frag); $tabnum += 1 ) {
                 $tab = $survey_frag[$tabnum];
+                if( !isset($tab['contents']) ) { continue; }
                 for( $grpnum = 0; $grpnum < count($tab['contents']); $grpnum += 1 ) {
                     $group = $tab['contents'][$grpnum];
                     # categories are synonymous with questions
+                    if( !isset($group['contents']) ) { continue; }
                     for( $catnum = 0; $catnum < count($group['contents']); $catnum += 1 ) {
                         $cat = $group['contents'][$catnum];
                         if($byscope) {
