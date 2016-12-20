@@ -1368,6 +1368,9 @@ WCSA.show_tab_section = function(elem, tid) {
     $('.tabsection').hide();
     $('.ttitle').removeClass('selected');
 
+    // go to top
+    scroll(0,0);
+
     // show this one
     document.getElementById(tid).style.display = 'block';
     elem.classList.add('selected');
