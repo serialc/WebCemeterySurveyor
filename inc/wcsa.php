@@ -1424,7 +1424,7 @@ class wcsalib {
         $ext = '.tsv';
 
         # Save data
-        $save_name = $project . '_' . date('Y-m-d_H-i-s');
+        $save_name = str_replace(' ', '_', $project) . '_' . date('Y-m-d_H-i-s');
         $save_path = $this->export_dir . $save_name . '/';
         $save_photo_path = $save_path . 'photographs/';
         
