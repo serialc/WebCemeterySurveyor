@@ -1419,8 +1419,8 @@ WCSA.move_photo_between_feature = function(photoname, direction) {
         }
     })
     .fail(function(e) {
-        WCSA.warn(e);
-        console.log(e);
+        WCSA.warn(e.responseText);
+        console.log(e.responseText);
     });
 };
 

@@ -1197,6 +1197,20 @@ class wcsalib {
     public function move_photograph($data) {
         $scopepath = '';
 
+        # Check to see if the photo is in use/associated - if so prevent move to unsorted
+        if( $data['direction'] == 'unsorted' ) {
+            # we want to check the json data for this picture being associated
+            $state = $this->_load_scope_state($data['id']['scope'], $data['id']);
+
+            foreach( $state['photographs'] as $photo ) {
+                if( $photo['file'] == $data['picture'] ) {
+                    # Picture in use, don't allow throwing away
+                    print("Picture in use.</br>");
+                    return false;
+                }
+            }
+        }
+
         # Move the photo
         switch($data['id']['scope']) {
         case 'cemetery':
