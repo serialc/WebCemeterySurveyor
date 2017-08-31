@@ -2,12 +2,13 @@
 
 A web-based version of the [Android version](https://play.google.com/store/apps/details?id=net.frakturmedia.cemeterysurvey) of [Cemetery Surveyor](https://github.com/serialc/CemeterySurveyor) created for the University of Luxembourg.
 
-WCS was designed with providing accessibility and visibility to data. All data is contained in folders and JSON files rather than a database as was donw with CSA to keep data access for non technical users simpler.
+WCS was designed with providing accessibility and visibility to data. All data is contained in folders and JSON files rather than a database as was done with CSA to keep data access for non technical users simpler.
 
 ## Configuration
 
 - Rename containing folder/directory from WebCemeterySurvyor-master to WCS
 - Place WCS in the root folder. If you desire to locate it elsewhere you will need to update 8 locations in index.php.
+- Depending on web service permissions you may need to create the required folders manually (or 'sudo php index.php')
 
 # Using WCS
 

@@ -1703,19 +1703,19 @@ WCSA.toggle_featurepics= function() {
     }
 };
 
-WCSA.unlink_photograph = function(filename) {
+WCSA.unlink_photograph = function(filename, cat, attrib) {
     var elem;
 
     $.ajax({
         type: "POST",
         url: WCSA.base_path + "inc/associate_photo.php",
         dataType: "json",
-        data:  {"action": "unlink", "picture": filename, "id": WCSA.id}
+        data:  {"action": "unlink", "picture": filename, "category": cat, "attribute": attrib, "id": WCSA.id}
     })
     .done(function(e) {
         // On successful move
         // Remove picture from picture_carousel
-        elem = document.getElementById(filename);
+        elem = document.getElementById(filename + "_" + cat + (attrib != 'undefined' ? '_' + attrib : '' ));
         elem.parentNode.removeChild(elem);
     })
     .fail(function(e) {
@@ -1756,12 +1756,12 @@ WCSA.show_scope_pictures = function() {
                 photo_fp = WCSA.base_path + 'data/' + WCSA.id.project +'/' + WCSA.id.cemetery +
                     (WCSA.id.section ? '/' + WCSA.id.section : '') +
                     (WCSA.id.grave ? '/' + WCSA.id.grave : '') + 
-                    '/photographs/' + pic;
+                    '/photographs/' + data[pic].file;
 
-                htmls += '<div id="' + pic + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12"><div class="row"><div class="col-xs-12 text-xs-center">';
-                htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + pic + '\')" src="' + photo_fp + '">';
-                htmls += '<div class="photo_info">' + data[pic].name + (data[pic].attribute ? ': ' + data[pic].attribute : '') + '</div>';
-                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + pic + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
+                htmls += '<div id="' + data[pic].file + '_' + data[pic].category + (data[pic].attribute ? '_' + data[pic].attribute : '') + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12 thumbnail_box"><div class="row"><div class="col-xs-12 text-xs-center">';
+                htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[pic].file + '\')" src="' + photo_fp + '">';
+                htmls += '<div class="photo_info">' + data[pic].category + (data[pic].attribute ? ': ' + data[pic].attribute : '') + '</div>';
+                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + data[pic].file + '\',\'' + data[pic].category + '\',\'' + data[pic].attribute + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
                 htmls += '</div></div></div>';
             }
             picont.innerHTML = htmls;

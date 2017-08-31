@@ -1158,7 +1158,35 @@ class wcsalib {
         $state = $this->_load_scope_state($data['id']['scope'], $data['id']);
 
         # remove this photograph from the json
-        unset($state['photographs'][$data['picture']]);
+        # The below item is an array we need to check that the $data['picture'], $data['category'], $data['attribute'] match as appropriate
+        for($pn = 0; $pn < count($state['photographs']); $pn += 1) {
+
+            # compare picture filename, break if found
+            if( $state['photographs'][$pn]['file'] == $data['picture'] &&
+                $state['photographs'][$pn]['category'] == $data['category'] ) {
+                # Need to check that attribute match if present
+                
+                if( $data['attribute'] == 'undefined' && !isset($state['photographs'][$pn]['attribute']) ) {
+                    # match - has no attributes
+                    # drop value to delete
+                    unset($state['photographs'][$pn]);
+                    # reindex array
+                    $state['photographs'] = array_values($state['photographs']);
+
+                    break;
+                }
+                if( $data['attribute'] != 'undefined' && isset($state['photographs'][$pn]['attribute']) &&
+                    $data['attribute'] == $state['photographs'][$pn]['attribute'] ) {
+                    # match - has same attributes
+                    # drop value to delete
+                    unset($state['photographs'][$pn]);
+                    # reindex array
+                    $state['photographs'] = array_values($state['photographs']);
+
+                    break;
+                } 
+            }
+        }
 
         # Save the update state data
         $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
@@ -1219,10 +1247,13 @@ class wcsalib {
         # data['attribute'] is the optional/possible attribute name for this category
         
         # Update the json data
+        # Is the picture associated with a category or a category's attribute?
         if( isset($data['attribute']) ) {
-            $state['photographs'][$data['picture']] = array("name" => $data['name'], "attribute" => $data['attribute']);
+            # append to photographs array
+            $state['photographs'][] = array("file" => $data['picture'], "category" => $data['name'], "attribute" => $data['attribute']);
         } else {
-            $state['photographs'][$data['picture']] = array("name" => $data['name']);
+            # append to photographs array
+            $state['photographs'][] = array("file" => $data['picture'], "category" => $data['name']);
         }
 
         # Save the update state data

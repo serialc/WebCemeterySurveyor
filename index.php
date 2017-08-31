@@ -146,7 +146,7 @@ $wcsa->page_request(explode('/', rtrim($req, '/')));
     <!-- footer -->
     <div id="pictures_footer">
       <div class='toprightbox' onclick="WCSA.toggle_featurepics()" title="Close the photographs window"><i class="fa fa-times" aria-hidden="true"></i></div>
-      <div class='bottomrightbox' onclick="WCSA.toggle_unsortedpics()" title="Toggle visibility of unsorted photos for import"><i class="fa fa-camera" aria-hidden="true"></i></div>
+      <div class='bottomrightbox' onclick="WCSA.toggle_unsortedpics()" title="Toggle visibility of unsorted photos for import"><i class="fa fa-folder" aria-hidden="true"></i></div>
       <div id="picture_carousel">No photographs associated with this feature.<br>To add photographs import them from the unsorted photographs below.<br>Click the camera icon in the bottom right corner to display.</div>
       <div id="unsorted_carousel" style="display: none">No photographs found. To add photographs place them inside the 'WCS/photographs' folder.</div>
     </div>
