@@ -75,7 +75,6 @@ header {
   .bm_link_item div:nth-child(2) {
     font-style: italic;
     margin-top: 5px;
-    height: 100px;
     background-color: white;
     overflow: auto; }
 

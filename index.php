@@ -119,7 +119,7 @@ if ( $reqlen == 0 ) {
     print($headtext);
     
 } else {
-    print("Malformed request");
+    print("WCS Error: Malformed request. Perhaps folder permissions are incorrect?");
 }
 
 ?>
