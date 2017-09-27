@@ -1291,11 +1291,12 @@ class wcsalib {
 
                 print '<div class="col-lg-4 col-sm-6 col-xs-12">' . 
                     '<div class="row"><div class="col-sm-9 col-xs-8 item">' .
-                    '<a class="link_item" href="' . $this->basepath . 'surveys/' . $project . 
+                    '<a class="bm_link_item" href="' . $this->basepath . 'surveys/' . $project . 
                     '/cemeteries/' . $bm['cemetery'] . 
                     ( $bm['section'] !== '' ? '/sections/' . $bm['section'] : '' ) .
-                    ( $bm['grave'] !== '' ? '/graves/' . $bm['grave'] : '' ) . '">' .
-                    $bm['cemetery'] . ' ' . $bm['section'] . ' ' . $bm['grave'] .
+                    ( $bm['grave'] !== '' ? '/graves/' . $bm['grave'] : '' ) . '"><div>' .
+                    $bm['cemetery'] . ' ' . $bm['section'] . ' ' . $bm['grave'] . '</div>' .
+                    '<div><small>' . $bm['note'] . '</small></div>' .
                     '</a>' . 
                     '</div>' .
                     '<div class="col-sm-2 col-xs-3 item left-div"><a class="link_item" href="#" onclick="WCSA.delete_bookmark(' . $i . ')"><i class="fa fa-trash" aria-hidden="true"></i></a></div>' . 
@@ -1305,7 +1306,11 @@ class wcsalib {
         }
     }
 
-    public function add_bookmark($identobj) {
+    public function add_bookmark($passed) {
+        # seperate note and identifier object
+        $identobj = $passed['data'];
+        $note = $passed['note'];
+
         $bmfp = $this->data . $identobj['project'] . '/bookmarks.json';
 
         # Get existing bookmarks or create new array
@@ -1317,6 +1322,7 @@ class wcsalib {
 
         # Add new bookmark
         array_push($bookmarks, array(
+            'note' => $note,
             'scope' => $identobj['scope'],
             'cemetery' => $identobj['cemetery'],
             'section' => ( isset($identobj['section']) ? $identobj['section'] : ''),
@@ -1327,8 +1333,8 @@ class wcsalib {
         return file_put_contents($bmfp, json_encode($bookmarks, JSON_PRETTY_PRINT) );
     }
 
-    public function delete_bookmark($data) {
-        $bmfp = $this->data . $data['id']['project'] . '/bookmarks.json';
+    public function delete_bookmark($identobj) {
+        $bmfp = $this->data . $identobj['id']['project'] . '/bookmarks.json';
         if( file_exists($bmfp) ) {
             $bookmarks = json_decode(file_get_contents( $bmfp ), true);
         } else {
@@ -1336,7 +1342,7 @@ class wcsalib {
         }
 
         # delete
-        unset($bookmarks[$data['bid']]);
+        unset($bookmarks[$identobj['bid']]);
         # To prevent associative array creation by unset-ing
         $bookmarks = array_values($bookmarks);
 

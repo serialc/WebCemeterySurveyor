@@ -58,18 +58,26 @@ header {
   padding: 0 0;
   margin-top: 20px; }
 
-.link_item {
+.link_item, .bm_link_item {
   text-align: center;
   padding: 10px 10px;
-  width: 100%;
   display: block;
   height: 47px;
   cursor: pointer;
   color: #0275d8;
   box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24); }
-  .link_item:hover {
+  .link_item:hover, .bm_link_item:hover {
     color: #014c8c;
     text-decoration: none; }
+
+.bm_link_item {
+  height: 147px; }
+  .bm_link_item div:nth-child(2) {
+    font-style: italic;
+    margin-top: 5px;
+    height: 100px;
+    background-color: white;
+    overflow: auto; }
 
 .left-div {
   border-left: solid 1px #2196F3; }

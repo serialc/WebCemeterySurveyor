@@ -23,7 +23,7 @@ WCSA.new_scope_item = function(scope, project, cemetery, section) {
     var html;
 
     htmls = '<form onsubmit="return false">' + 
-    '<input type="hidden" id="type" name="type" value="new_scope_item">' +
+        '<input type="hidden" id="type" name="type" value="new_scope_item">' +
         '<input type="hidden" id="scope" name="scope" value="' + scope + '">' +
         '<input type="hidden" id="project" name="project" value="' + project + '">';
 
@@ -1788,23 +1788,50 @@ WCSA.show_photo = function(photo_path, name) {
 WCSA.bookmark = function() {
     var e = document.getElementsByClassName('fa-bookmark-o');
 
-    // change the bookmark symbol to show it has been clicked
-    if( e.length > 0 ) {
-        e[0].classList.add('fa-bookmark');
-        e[0].classList.remove('fa-bookmark-o');
-    }
+    // Create modal content
+    htmls = '<form onsubmit="return false">';
+    htmls += WCSA.format_input('bookmarknote', 'Note:', '', 'e.g., Is incomplete, resume here', 'text', '');
+    htmls += '</form>';
 
-    $.ajax({
-        type: "POST",
-        dataType: "json",
-        url: WCSA.base_path + "inc/bookmark.php",
-        data: {"op": "new", "data": WCSA.id}
-    })
-    .done(function(msg) {})
-    .fail(function(e) {
-        console.log(e);
-        WCSA.error("Unable to save bookmark due to: " + e);
+    // Prep modal
+    $('.modal-title', '#main_modal').html('<h2>Add bookmark &amp; note</h2>');
+    $('.modal-body', '#main_modal').html(htmls);
+
+    // After the modal appears do the following...
+    $('#main_modal').on('shown.bs.modal', function () {
+        $('#bookmarknote').focus();
     });
+
+    // on submit handler
+    $('.btn-primary', '#main_modal').html('Submit').click(function() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: WCSA.base_path + "inc/bookmark.php",
+            data: {"op": "new", "note": document.getElementById('bookmarknote').value, "data": WCSA.id}
+        })
+        .done(function(msg) {
+            // change the bookmark symbol to show it has been clicked
+            if( e.length > 0 ) {
+                e[0].classList.add('fa-bookmark');
+                e[0].classList.remove('fa-bookmark-o');
+            }
+
+            // Hide the modal and clear it
+            $('#main_modal').modal('hide');
+            // disable click
+            $('.btn-primary', '#main_modal').html('Submit').off('click');
+            document.getElementById('bookmarknote').value = '';
+        })
+        .fail(function(e) {
+            // throw error
+            console.log(e);
+            WCSA.error("Unable to save bookmark due to: " + e);
+        });
+    });
+
+    // Show the modal
+    $('#main_modal').modal('toggle');
 };
 
 WCSA.delete_bookmark = function(id) {

@@ -105,10 +105,9 @@ header {
     margin-top: 20px;
 }
 
-.link_item {
+.link_item, .bm_link_item {
     text-align: center;
     padding: 10px 10px;
-    width: 100%;
     display: block;
     height: 47px;
     cursor: pointer;
@@ -117,6 +116,16 @@ header {
     &:hover {
         color: $link-hover;
         text-decoration: none;
+    }
+}
+.bm_link_item {
+    height: 147px;
+    div:nth-child(2) {
+        font-style: italic;
+        margin-top: 5px;
+        height: 100px;
+        background-color: white;
+        overflow: auto;
     }
 }
 

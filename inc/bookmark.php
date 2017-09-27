@@ -10,7 +10,7 @@ require('wcsa.php');
 
 switch($passed['op']) {
 case 'new':
-    if($wcsa->add_bookmark($passed['data'])) {
+    if($wcsa->add_bookmark($passed)) {
         print '{}';
     }
     break;
