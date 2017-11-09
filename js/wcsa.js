@@ -1756,12 +1756,12 @@ WCSA.show_scope_pictures = function() {
                 photo_fp = WCSA.base_path + 'data/' + WCSA.id.project +'/' + WCSA.id.cemetery +
                     (WCSA.id.section ? '/' + WCSA.id.section : '') +
                     (WCSA.id.grave ? '/' + WCSA.id.grave : '') + 
-                    '/photographs/' + pic;
+                    '/photographs/' + data[pic].file;
 
-                htmls += '<div id="' + data[pic].name + '_' + data[pic].category + (data[pic].attribute ? '_' + data[pic].attribute : '') + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12 thumbnail_box"><div class="row"><div class="col-xs-12 text-xs-center">';
-                htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[pic].name + '\')" src="' + photo_fp + '">';
+                htmls += '<div id="' + data[pic].category + '_' + data[pic].category + (data[pic].attribute ? '_' + data[pic].attribute : '') + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12 thumbnail_box"><div class="row"><div class="col-xs-12 text-xs-center">';
+                htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[pic].category + '\')" src="' + photo_fp + '">';
                 htmls += '<div class="photo_info">' + data[pic].category + (data[pic].attribute ? ': ' + data[pic].attribute : '') + '</div>';
-                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + data[pic].name + '\',\'' + data[pic].category + '\',\'' + data[pic].attribute + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
+                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + data[pic].category + '\',\'' + data[pic].category + '\',\'' + data[pic].attribute + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
                 htmls += '</div></div></div>';
             }
             picont.innerHTML = htmls;
