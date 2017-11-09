@@ -1756,7 +1756,7 @@ WCSA.show_scope_pictures = function() {
                 photo_fp = WCSA.base_path + 'data/' + WCSA.id.project +'/' + WCSA.id.cemetery +
                     (WCSA.id.section ? '/' + WCSA.id.section : '') +
                     (WCSA.id.grave ? '/' + WCSA.id.grave : '') + 
-                    '/photographs/' + data[pic].name;
+                    '/photographs/' + pic;
 
                 htmls += '<div id="' + data[pic].name + '_' + data[pic].category + (data[pic].attribute ? '_' + data[pic].attribute : '') + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12 thumbnail_box"><div class="row"><div class="col-xs-12 text-xs-center">';
                 htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[pic].name + '\')" src="' + photo_fp + '">';
