@@ -27,6 +27,15 @@ class wcsalib {
         # Check that a few general purpose directories exist, create them it if not
         foreach(array($this->thumbnails, $this->photo_dir, $this->data, $this->export_dir) as $fcheck) {
             if (!file_exists($fcheck)) { 
+
+                # Data has different permissions than others
+                if( $fcheck === $this->data ) {
+                    if( !mkdir($fcheck, 0777) ) {
+                        print "<div class='alert alert-danger'>Failed to create directory $fcheck. Check your permissions.</div>";
+                    }
+                    continue;
+                }
+
                 if( !mkdir($fcheck, 0755) ) {
                     print "<div class='alert alert-danger'>Failed to create directory $fcheck. Check your permissions.</div>";
                 }
