@@ -26,7 +26,11 @@ class wcsalib {
 
         # Check that a few general purpose directories exist, create them it if not
         foreach(array($this->thumbnails, $this->photo_dir, $this->data, $this->export_dir) as $fcheck) {
-            if (!file_exists($fcheck)) { mkdir($fcheck); } 
+            if (!file_exists($fcheck)) { 
+                if( !mkdir($fcheck, 0755) ) {
+                    print "<div class='alert alert-danger'>Failed to create directory $fcheck. Check your permissions.</div>";
+                }
+            } 
         }
 
         # Get URL base path
