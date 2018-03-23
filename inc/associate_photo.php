@@ -9,14 +9,10 @@ $data = $_POST;
 require('wcsa.php');
 
 if($data['action'] === "associate") {
-    if($wcsa->associate_photo($data)) {
-        print '{}';
-    }
+    $wcsa->associate_photo($data);
 }
 if($data['action'] === "unlink") {
-    if($wcsa->disassociate_photo($data)) {
-        print '{}';
-    }
+    $wcsa->disassociate_photo($data);
 }
 
 ?>

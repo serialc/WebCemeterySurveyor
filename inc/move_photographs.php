@@ -8,10 +8,6 @@ $data = $_POST;
 
 require('wcsa.php');
 
-if( $wcsa->move_photograph($data) ) {
-    print('{}');
-} else {
-    print "Error moving photograph";
-}
+$wcsa->move_photograph($data);
 
 ?>

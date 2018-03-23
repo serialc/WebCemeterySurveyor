@@ -184,7 +184,7 @@ class wcsalib {
                 $this->send_error("DUPLICATE ERROR: Survey name already exists.");
             }
         } else {
-            $this->send_error("NO WRITING PERMISSION: Cannot create folders/files.");
+            $this->send_error("NO WRITING PERMISSION: Cannot create folders/files.", 500);
         }
     }
 
@@ -801,7 +801,6 @@ class wcsalib {
 
         default:
             $this->send_error("Scope type not expected in build_scope_pictures().");
-            $this->_response('', 500);
             return '';
         }
 
@@ -812,7 +811,7 @@ class wcsalib {
     public function get_unsorted_photographs() {
         $pics = $this->_list_files($this->photo_dir);
         if( $pics === false ) {
-            $wcsa->send_error("Could not retrieve list of photographs directory");
+            $wcsa->send_error("Could not retrieve list of photographs directory.");
         }
         return(json_encode($pics));
     }
@@ -1129,8 +1128,8 @@ class wcsalib {
         return($files);
     }
 
-    public function send_error($msg) {
-        print($this->_response($msg, 400));
+    public function send_error($msg, $status = 400) {
+        print $this->_response($msg, $status);
     }
 
     private function _response($data, $status = 200) {
@@ -1192,8 +1191,10 @@ class wcsalib {
                     unset($state['photographs'][$pn]);
                     # reindex array
                     $state['photographs'] = array_values($state['photographs']);
-
-                    break;
+                    print $this->_response("Deleted link to " . $data['picture']);
+                    # Save the update state data
+                    $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
+                    return;
                 }
                 if( $data['attribute'] != 'undefined' && isset($state['photographs'][$pn]['attribute']) &&
                     $data['attribute'] == $state['photographs'][$pn]['attribute'] ) {
@@ -1202,16 +1203,15 @@ class wcsalib {
                     unset($state['photographs'][$pn]);
                     # reindex array
                     $state['photographs'] = array_values($state['photographs']);
-
-                    break;
+                    print $this->_response("Deleted link to " . $data['picture']);
+                    # Save the update state data
+                    $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
+                    return;
                 } 
             }
         }
-
-        # Save the update state data
-        $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
-
-        return true;
+        # if we reach here we didn't find the picture but we should have!
+        $this->send_error("Failed to unlink photograph to feature!", 500);
     }
 
     public function move_photograph($data) {
@@ -1225,8 +1225,8 @@ class wcsalib {
             foreach( $state['photographs'] as $photo ) {
                 if( $photo['file'] == $data['picture'] ) {
                     # Picture in use, don't allow throwing away
-                    print("Picture in use.</br>");
-                    return false;
+                    $this->send_error('Picture is associated with a feature. Remove association to remove picture from this item.');
+                    return;
                 }
             }
         }
@@ -1249,8 +1249,8 @@ class wcsalib {
             break;
 
         default:
-            $this->send_error("Unable to find proper scope to relocate photograph.");
-            return false;
+            $this->send_error("Unable to find proper scope to relocate photograph.", 500);
+            return;
         }
        
         switch($data['direction']) {
@@ -1261,11 +1261,11 @@ class wcsalib {
             rename($scopepath, $this->photo_dir . $data['picture']);
             break;
         default:
-            $this->send_error("Unable to find proper destination to relocate photograph.");
-            return false;
+            $this->send_error("Unable to find proper destination to relocate photograph.", 500);
+            return;
         }
 
-        return true;
+        print $this->_response("Photo moved successfully.");
     }
 
     public function associate_photo($data) {
@@ -1293,7 +1293,8 @@ class wcsalib {
         # Save the update state data
         $this->_save_scope_state($data['id']['scope'], $data['id'], $state);
 
-        return true;
+        print $this->_response("Photo association successfull.");
+        return;
     }
 
     private function _show_bookmarks($project) {
@@ -1389,12 +1390,12 @@ class wcsalib {
                 if( $del_pdir && $del_dfile && $del_grave ) {
                     return true;
                 } else {
-                    $this->send_error("Could not delete " . data['scope'] . " correctly");
+                    $this->send_error("Could not delete " . data['scope'] . " correctly", 500);
                 }
                 break;
 
             default:
-                $this->send_error("Deletion of scopes other than 'grave' is not implemented");
+                $this->send_error("Deletion of scopes other than 'grave' is not implemented", 500);
 
         }
     }

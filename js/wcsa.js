@@ -1397,30 +1397,12 @@ WCSA.move_photo_between_feature = function(photoname, direction) {
         // Reinitialize the picture behaviours by reloading both strips/carousels
         WCSA.populate_unsortedpics(true); // true - reset/remove previous
         WCSA.populate_featurepics(true); // true - reset/remove previous
-        //htmlimg = htmlimg.parentNode.removeChild(htmlimg)
-        if( direction === 'unsorted' ) {
-            // unsorted_carousel
-            //document.getElementById('unsorted_carousel').prepend(htmlimg)
 
-            // need to dissociate any attributes of this picture
-            $.ajax({
-                type: "POST",
-                url: WCSA.base_path + "inc/associate_photo.php",
-                dataType: "json",
-                data:  {"action": "unlink", "picture": photoname, "id": WCSA.id}
-            })
-            .done(function(msg) {})
-            .fail(function(e) { WCSA.warn(e); console.log(e); });
-
-        }
-        if( direction === 'scope' ) {
-            // picture_carousel
-            //document.getElementById('picture_carousel').prepend(htmlimg)
-        }
+        // If we want to move the picture from this scope item back to the unordered pictures 
+        // but it is associated with a feature - it will throw a warning and block transfer.
     })
     .fail(function(e) {
-        WCSA.warn(e.responseText);
-        console.log(e.responseText);
+        WCSA.warn(e.responseJSON);
     });
 };
 
@@ -1475,7 +1457,6 @@ WCSA.populate_unsortedpics = function(reset) {
         // Show the available images in the carrousel
         for(i = 0; i < data.length; i += 1) {
             photo_fp = WCSA.base_path + 'photographs/' + data[i];
-            //htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[i] + '\')" title="Click to move up to feature. Double click to enlarge" src="' + photo_fp + '" draggable="true">';
             htmls += '<img id="' + data[i] + '" onclick="WCSA.move_photo_between_feature(\'' + data[i] + '\', \'scope\')" title="Click to move photograph to feature." src="' + photo_fp + '" draggable="true">';
         }
         unsorted_cont.innerHTML = htmls;
@@ -1759,10 +1740,10 @@ WCSA.show_scope_pictures = function() {
                     (WCSA.id.grave ? '/' + WCSA.id.grave : '') + 
                     '/photographs/' + data[pic].file;
 
-                htmls += '<div id="' + data[pic].category + '_' + data[pic].category + (data[pic].attribute ? '_' + data[pic].attribute : '') + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12 thumbnail_box"><div class="row"><div class="col-xs-12 text-xs-center">';
+                htmls += '<div id="' + data[pic].file + '_' + data[pic].category + (data[pic].attribute ? '_' + data[pic].attribute : '') + '" class="col-lg-3 col-md-4 col-sm-6 col-xs-12 thumbnail_box"><div class="row"><div class="col-xs-12 text-xs-center">';
                 htmls += '<img class="thumbnail" title="Double click to enlarge" ondblclick="WCSA.show_photo(\'' + photo_fp + '\',\'' + data[pic].category + '\')" src="' + photo_fp + '">';
                 htmls += '<div class="photo_info">' + data[pic].category + (data[pic].attribute ? ': ' + data[pic].attribute : '') + '</div>';
-                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + data[pic].category + '\',\'' + data[pic].category + '\',\'' + data[pic].attribute + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
+                htmls += '<button type="button" title="Remove photograph link to this item" class="btn btn-warning photo_rem" onclick="WCSA.unlink_photograph(\'' + data[pic].file + '\',\'' + data[pic].category + '\',\'' + data[pic].attribute + '\')"><i class="fa fa-unlink" aria-hidden="true"></i></button>';
                 htmls += '</div></div></div>';
             }
             picont.innerHTML = htmls;
