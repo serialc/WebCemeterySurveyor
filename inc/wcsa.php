@@ -810,7 +810,11 @@ class wcsalib {
     
     # Returns the list of photographs in the unsorted photographs folder
     public function get_unsorted_photographs() {
-        return(json_encode($this->_list_files($this->photo_dir)));
+        $pics = $this->_list_files($this->photo_dir);
+        if( $pics === false ) {
+            $wcsa->send_error("Could not retrieve list of photographs directory");
+        }
+        return(json_encode($pics));
     }
     public function submit_data($passed) {
         $scope = $passed['scope'];
@@ -1111,7 +1115,7 @@ class wcsalib {
     private function _list_files($path) {
         $path = trim($path, '/');
         if( !file_exists($path) ) { 
-            echo "Failed to retrieve contents of $path";
+            $wcsa->send_error("Could not retrieve list of directory $path");
             return false;
         }
 

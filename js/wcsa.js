@@ -1481,6 +1481,7 @@ WCSA.populate_unsortedpics = function(reset) {
         unsorted_cont.innerHTML = htmls;
     })
     .fail(function(e) {
+        console.log(e);
         WCSA.warn("Couldn't load list of unsorted photographs");
     });
 };
