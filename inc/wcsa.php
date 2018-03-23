@@ -1110,7 +1110,10 @@ class wcsalib {
     # only list files, not dirs
     private function _list_files($path) {
         $path = trim($path, '/');
-        if( !file_exists($path) ) { return false; }
+        if( !file_exists($path) ) { 
+            echo "Failed to retrieve contents of $path";
+            return false;
+        }
 
         $flist = scandir($path);
         $files = array();
