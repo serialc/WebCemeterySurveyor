@@ -7,6 +7,10 @@ require('wcsa.php');
 
 # check that all have values
 foreach($new_item as $name => $value) {
+    # remove unnecessary spaces
+    $new_item[$name] = trim($value);
+
+    # check if empty
     if( $value == '' ) {
         $wcsa->send_error('VALUE ERROR: ' . $name . ' has no value');
     }
