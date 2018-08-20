@@ -1541,8 +1541,8 @@ class wcsalib {
             # Photographs
             if( isset( $cstate['photographs'] ) ) {
                 foreach( $cstate['photographs'] as $fn => $assoc ) {
-                    $cphoto .= $c . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
-                    copy($this->data . $project . '/' . $c . '/photographs/' . $fn, $save_photo_path . $fn);
+                    $cphoto .= $c . $delim . $assoc['file'] . $delim . $assoc['category'] . $delim . (isset($assoc['attribute']) ? $assoc['attribute'] : '') . $nl;
+                    copy($this->data . $project . '/' . $c . '/photographs/' . $assoc['file'], $save_photo_path . $assoc['file']);
                 }
             }
 
@@ -1570,8 +1570,8 @@ class wcsalib {
                 # Photographs
                 if( isset( $sstate['photographs'] ) ) {
                     foreach( $sstate['photographs'] as $fn => $assoc ) {
-                        $sphoto .= $c . '_' . $s . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
-                        copy($this->data . $project . '/' . $c . '/' . $s . '/photographs/' . $fn, $save_photo_path . $fn);
+                        $sphoto .= $c . '_' . $s . $delim . $assoc['file'] . $delim . $assoc['category'] . $delim . (isset($assoc['attribute']) ? $assoc['attribute'] : '') . $nl;
+                        copy($this->data . $project . '/' . $c . '/' . $s . '/photographs/' . $assoc['file'], $save_photo_path . $assoc['file']);
                     }
                 }
 
@@ -1599,8 +1599,8 @@ class wcsalib {
                     # Photographs
                     if( isset( $gstate['photographs'] ) ) {
                         foreach( $gstate['photographs'] as $fn => $assoc ) {
-                            $gphoto .= $c . '_' . $s . '_' . $g . $delim . $fn . $delim . $assoc['name'] . $delim . $assoc['attribute'] . $nl;
-                            copy($this->data . $project . '/' . $c . '/' . $s . '/' . $g . '/photographs/' . $fn, $save_photo_path . $fn);
+                            $gphoto .= $c . '_' . $s . '_' . $g . $delim . $assoc['file'] . $delim . $assoc['category'] . $delim . (isset($assoc['attribute']) ? $assoc['attribute'] : '') . $nl;
+                            copy($this->data . $project . '/' . $c . '/' . $s . '/' . $g . '/photographs/' . $assoc['file'], $save_photo_path . $assoc['file']);
                         }
                     }
                 }
