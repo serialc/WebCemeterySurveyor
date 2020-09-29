@@ -4,18 +4,23 @@ A web-based version of the [Android version](https://play.google.com/store/apps/
 
 WCS was designed with providing accessibility and visibility to data. All data is contained in folders and JSON files rather than a database as was done with CSA to keep data access for non technical users simpler.
 
-## Configuration
+## Installation
 
-- Requirements: A server, with PHP, using the rewrite mod
-  * Rewrite mod installation:
+### Requirements
+- A server,  with:
+  * PHP [with zip support](https://www.php.net/manual/en/zip.installation.php)
+  * using the Rewrite mod Rewrite mod. Installation:
 ```bash
     sudo a2enmod rewrite
     sudo systemctl restart apache2
 ```
-        
-- Rename containing folder/directory from WebCemeterySurvyor-master to WCS
-- Place WCS in the root folder. If you desire to locate it elsewhere you will need to update 8 locations in index.php.
+
+### Configuration
+- Download and extract the application to your webserver root folder or a sub-folder.
+- Rename the containing folder/directory from ```WebCemeterySurvyor-master``` to ```WCS```
+- If you desire to have WCS elsewhere than in the root path/folder, you will need to update 8 locations in index.php.
 - Depending on web service permissions you may need to create the required folders manually (or 'sudo php index.php')
+  * Folders generated and which the server user needs access to modify are: ```data export```
 
 # Using WCS
 
