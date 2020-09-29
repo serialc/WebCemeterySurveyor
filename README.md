@@ -8,7 +8,7 @@ WCS was designed with providing accessibility and visibility to data. All data i
 
 ### Requirements
 - A server,  with:
-  * PHP [with zip support](https://www.php.net/manual/en/zip.installation.php)
+  * PHP [with zip support](https://www.php.net/manual/en/zip.installation.php). Linux installation: ``` sudo apt install php7.4-zip; sudo systemctl restart apache2 ```
   * using the Rewrite mod Rewrite mod. Installation:
 ```bash
     sudo a2enmod rewrite
