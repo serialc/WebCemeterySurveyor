@@ -18,7 +18,7 @@ WCS was designed with providing accessibility and visibility to data. All data i
 ### Configuration
 - Download and extract the application to your webserver root folder or a sub-folder.
 - Rename the containing folder/directory from ```WebCemeterySurvyor-master``` to ```WCS```
-- If you desire to have WCS elsewhere than in the root path/folder, you will need to update 8 locations in index.php.
+- If you desire to have WCS elsewhere than in the root path/folder, you will need to update 9 locations in index.php.
 - Depending on web service permissions you may need to create the required folders manually (or 'sudo php index.php')
   * Folders generated and which the server (user) needs access to, for modificating the contents of, are: ```data export photographs```
 
