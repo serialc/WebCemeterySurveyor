@@ -39,9 +39,11 @@ header {
   display: none;
   background-color: #c9302c;
   color: white;
-  width: 100%;
-  z-index: 2000;
-  opacity: 0.8; }
+  z-index: 20;
+  position: absolute;
+  top: 125px;
+  opacity: 0.8;
+  padding: 5px; }
 
 #warn_header {
   background-color: orange;
@@ -212,6 +214,7 @@ h2 {
 
 .squest:nth-child(2n+1) > div:first-child {
   background-color: #DDD; }
+
 .squest:nth-child(2n) > div:first-child {
   background-color: #EEE; }
 
@@ -222,6 +225,7 @@ h2 {
   padding-top: 10px;
   padding-bottom: 10px;
   cursor: pointer; }
+
 .squest i, .sgroup i, .stab i, .sscope i {
   text-align: center;
   cursor: pointer;
@@ -259,7 +263,9 @@ h2 {
   padding: 15px;
   cursor: pointer;
   box-shadow: 0 -1px 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24);
-  z-index: 10; }
+  z-index: 10;
+  overflow: hidden;
+  text-overflow: ellipsis; }
   .ttitle:hover {
     opacity: 0.9; }
 
@@ -300,8 +306,9 @@ h2 {
   padding: 5px; }
 
 .thumbnail {
-  max-width: 100%;
-  height: 200px; }
+  width: 100%;
+  height: 100px;
+  object-fit: contain; }
 
 #pictures_footer {
   display: none;
@@ -333,5 +340,3 @@ h2 {
 
 .active_dz {
   border: 2px dashed red; }
-
-/*# sourceMappingURL=wcs.css.map */

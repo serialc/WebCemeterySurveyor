@@ -125,8 +125,8 @@ if ( $reqlen == 0 ) {
 ?>
                 </div>
             </nav>
-            <div id="error_header"><div id="error_header_content" class="container"></div></div>
-            <div id="warn_header"><div id="warn_header_content" class="container"></div></div>
+            <div id="error_header"><div id="error_header_content" class=""></div></div>
+            <div id="warn_header"><div id="warn_header_content" class=""></div></div>
         </div>
     </header>
     <div id="main-content">

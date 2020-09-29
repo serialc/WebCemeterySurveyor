@@ -549,7 +549,7 @@ class wcsalib {
                         if( !file_exists($this->thumbnails . $cat['attributes']) ) {
                             print 'Did not find any thumbnail images in the folder \'' . $cat['attributes'] . '\'.';
                             print '</div>'; # Close category/question div
-                            continue;
+                            break;
                         }
                         # Get the list of files in the directory
                         $thumbs = $this->_list_files($this->thumbnails . $cat['attributes'] . '/');
@@ -620,7 +620,7 @@ class wcsalib {
                         if( !file_exists($this->thumbnails . $cat['attributes']) ) {
                             print 'Did not find any thumbnail images in the folder \'' . $cat['attributes'] . '\'.';
                             print '</div>'; # Close category/question div
-                            continue;
+                            break;
                         }
                         # Get the list of files in the directory
                         $thumbs = $this->_list_files($this->thumbnails . $cat['attributes']);
