@@ -6,6 +6,13 @@ WCS was designed with providing accessibility and visibility to data. All data i
 
 ## Configuration
 
+- Requirements: A server, with PHP, using the rewrite mod
+  * Rewrite mod installation:
+```bash
+    sudo a2enmod rewrite
+    sudo systemctl restart apache2
+```
+        
 - Rename containing folder/directory from WebCemeterySurvyor-master to WCS
 - Place WCS in the root folder. If you desire to locate it elsewhere you will need to update 8 locations in index.php.
 - Depending on web service permissions you may need to create the required folders manually (or 'sudo php index.php')
